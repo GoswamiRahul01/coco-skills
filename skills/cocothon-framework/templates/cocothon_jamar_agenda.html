@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cocothon Jamar — Agenda</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --sf-blue: #29B5E8;
+  --sf-dark: #11567F;
+  --navy: #0f172a;
+  --green: #22c55e;
+  --orange: #f97316;
+  --purple: #8b5cf6;
+  --pink: #ec4899;
+  --yellow: #eab308;
+  --teal: #14b8a6;
+  --red: #ef4444;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Lato', sans-serif; background: var(--navy); color: #e2e8f0; min-height: 100vh; padding: 40px 20px; }
+.container { max-width: 1400px; margin: 0 auto; }
+h1 { font-family: 'Montserrat', sans-serif; font-size: 2.8rem; font-weight: 800; margin-bottom: 8px; }
+h1 span { color: var(--sf-blue); }
+.subtitle { font-size: 1.1rem; color: #94a3b8; margin-bottom: 40px; font-weight: 300; }
+.layout { display: grid; grid-template-columns: 1fr 380px; gap: 50px; }
+.agenda-item { display: flex; align-items: stretch; margin-bottom: 16px; border-radius: 10px; overflow: hidden; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); }
+.time-badge { min-width: 120px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.85rem; color: #fff; padding: 16px 12px; }
+.agenda-content { flex: 1; padding: 16px 20px; display: flex; justify-content: space-between; align-items: center; }
+.agenda-title { font-family: 'Montserrat', sans-serif; font-size: 1.25rem; font-weight: 700; }
+.agenda-desc { font-size: 0.9rem; color: #94a3b8; margin-top: 4px; }
+.agenda-dur { font-size: 0.95rem; font-weight: 700; color: var(--sf-blue); white-space: nowrap; }
+.sidebar h2 { font-family: 'Montserrat', sans-serif; font-size: 1.5rem; font-weight: 700; color: var(--sf-blue); margin-bottom: 20px; border-bottom: 2px solid var(--sf-blue); padding-bottom: 8px; }
+.entregable { margin-bottom: 18px; padding-left: 16px; border-left: 3px solid rgba(255,255,255,0.1); }
+.entregable h3 { font-family: 'Montserrat', sans-serif; font-size: 1rem; font-weight: 700; }
+.entregable p { font-size: 0.85rem; color: #94a3b8; margin-top: 2px; }
+.criteria { margin-top: 30px; }
+.criteria h2 { color: var(--purple); border-color: var(--purple); }
+.criteria-item { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+.criteria-badge { min-width: 50px; padding: 5px 10px; border-radius: 6px; font-weight: 700; font-size: 0.8rem; text-align: center; color: #fff; }
+.criteria-text { font-size: 0.9rem; }
+
+/* Teams section */
+.teams-section { margin-top: 50px; }
+.teams-section h2 { font-family: 'Montserrat', sans-serif; font-size: 1.8rem; font-weight: 700; color: var(--sf-blue); margin-bottom: 24px; }
+.teams-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; }
+.team-card { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 16px 20px; }
+.team-card h3 { font-family: 'Montserrat', sans-serif; font-size: 0.95rem; font-weight: 700; margin-bottom: 4px; }
+.team-cat { font-size: 0.8rem; color: #94a3b8; margin-bottom: 10px; }
+.team-members { list-style: none; }
+.team-members li { font-size: 0.85rem; padding: 3px 0; color: #cbd5e1; }
+.team-members li::before { content: "• "; color: var(--sf-blue); }
+.prompt-box { margin-top: 12px; background: rgba(41,181,232,0.05); border: 1px solid rgba(41,181,232,0.2); border-radius: 6px; padding: 10px 12px; font-size: 0.8rem; color: #94a3b8; font-family: monospace; white-space: pre-wrap; }
+
+.footer { margin-top: 50px; text-align: center; color: #475569; font-size: 0.8rem; padding: 20px 0; border-top: 1px solid rgba(255,255,255,0.06); }
+
+@media print {
+  body { background: #fff; color: #1a1a2e; padding: 20px; }
+  .agenda-item { border: 1px solid #e2e8f0; }
+  .team-card { border: 1px solid #e2e8f0; }
+}
+</style>
+</head>
+<body>
+<div class="container">
+
+<h1>Agenda — <span>4 Horas de Impacto</span></h1>
+<p class="subtitle">Cocothon Jamar × Snowflake | 11 equipos, 41 participantes</p>
+
+<div class="layout">
+<div class="agenda">
+
+  <div class="agenda-item">
+    <div class="time-badge" style="background:var(--green)">0:00–0:10</div>
+    <div class="agenda-content">
+      <div><div class="agenda-title">Apertura + Demo</div><div class="agenda-desc">Demo en vivo de CoCo resolviendo un problema en 5 minutos (ejemplo genérico)</div></div>
+      <div class="agenda-dur">10 min</div>
+    </div>
+  </div>
+
+  <div class="agenda-item">
+    <div class="time-badge" style="background:var(--green)">0:10–0:25</div>
+    <div class="agenda-content">
+      <div><div class="agenda-title">Retos + Equipos</div><div class="agenda-desc">Presentación de los 11 retos y formación de equipos. Entrega de scripts iniciales.</div></div>
+      <div class="agenda-dur">15 min</div>
+    </div>
+  </div>
+
+  <div class="agenda-item">
+    <div class="time-badge" style="background:var(--orange)">0:25–0:40</div>
+    <div class="agenda-content">
+      <div><div class="agenda-title">Tutorial CoCo</div><div class="agenda-desc">Hands-on: SQL, Streamlit, Skills, Cortex AI. Cómo pedirle cosas a CoCo.</div></div>
+      <div class="agenda-dur">15 min</div>
+    </div>
+  </div>
+
+  <div class="agenda-item">
+    <div class="time-badge" style="background:var(--purple)">0:40–2:50</div>
+    <div class="agenda-content">
+      <div><div class="agenda-title">CoCo TIME</div><div class="agenda-desc">Equipos construyen soluciones — mentores circulan. Cada equipo arranca con su script.</div></div>
+      <div class="agenda-dur">2h 10min</div>
+    </div>
+  </div>
+
+  <div class="agenda-item">
+    <div class="time-badge" style="background:var(--pink)">2:50–3:05</div>
+    <div class="agenda-content">
+      <div><div class="agenda-title">Prep Demos</div><div class="agenda-desc">Equipos pulen su presentación y demo final</div></div>
+      <div class="agenda-dur">15 min</div>
+    </div>
+  </div>
+
+  <div class="agenda-item">
+    <div class="time-badge" style="background:var(--yellow)">3:05–3:40</div>
+    <div class="agenda-content">
+      <div><div class="agenda-title">Demo Day</div><div class="agenda-desc">Cada equipo presenta en vivo desde CoCo (3 min × 11 equipos)</div></div>
+      <div class="agenda-dur">35 min</div>
+    </div>
+  </div>
+
+  <div class="agenda-item">
+    <div class="time-badge" style="background:var(--sf-blue)">3:40–4:00</div>
+    <div class="agenda-content">
+      <div><div class="agenda-title">Premiación</div><div class="agenda-desc">Jurado, reconocimiento y próximos pasos</div></div>
+      <div class="agenda-dur">20 min</div>
+    </div>
+  </div>
+
+</div>
+
+<div class="sidebar">
+  <h2>Entregables</h2>
+  <div class="entregable"><h3>App funcional</h3><p>Streamlit app o notebook ejecutable en CoCo</p></div>
+  <div class="entregable"><h3>Demo en vivo</h3><p>Presentación con demo real (no slides estáticas)</p></div>
+  <div class="entregable"><h3>Insight accionable</h3><p>Al menos 1 hallazgo respaldado con datos</p></div>
+  <div class="entregable"><h3>Plan de implementación</h3><p>Cómo llevar la solución a producción</p></div>
+
+  <div class="criteria">
+    <h2>Criterios de Evaluación</h2>
+    <div class="criteria-item"><div class="criteria-badge" style="background:var(--green)">30%</div><div class="criteria-text">Impacto de negocio</div></div>
+    <div class="criteria-item"><div class="criteria-badge" style="background:var(--sf-blue)">25%</div><div class="criteria-text">Uso creativo de CoCo / AI</div></div>
+    <div class="criteria-item"><div class="criteria-badge" style="background:var(--orange)">25%</div><div class="criteria-text">Demo funcional (corre en vivo)</div></div>
+    <div class="criteria-item"><div class="criteria-badge" style="background:var(--purple)">20%</div><div class="criteria-text">Presentación y storytelling</div></div>
+  </div>
+</div>
+</div>
+
+<!-- TEAMS SECTION -->
+<div class="teams-section">
+<h2>11 Equipos × 7 Categorías</h2>
+<div class="teams-grid">
+
+  <div class="team-card">
+    <h3>Equipo 1 — Servicio al Cliente y CX</h3>
+    <div class="team-cat">4 personas | Categoría: CX</div>
+    <ul class="team-members">
+      <li>Sebastian Arteta</li>
+      <li>Jenny Morales</li>
+      <li>Marisela Reales</li>
+      <li>Alex Hernandez</li>
+    </ul>
+    <div class="prompt-box">Construye un agente que analice PQRs. Usa Cortex Search para indexar quejas y Cortex AI para clasificarlas por sentimiento y urgencia. Dashboard con métricas de atención.</div>
+  </div>
+
+  <div class="team-card">
+    <h3>Equipo 2 — Analytics, BI y Gestión</h3>
+    <div class="team-cat">4 personas | Categoría: Analytics</div>
+    <ul class="team-members">
+      <li>Rubén Navarro</li>
+      <li>Rosell Romero</li>
+      <li>Diana Ayala</li>
+      <li>Kenny Guerrero</li>
+    </ul>
+    <div class="prompt-box">Configura una Semantic View sobre tablas operativas y crea un agente SI que permita consultas en lenguaje natural con gráficos automáticos. Incluye tablero de KPIs operativos.</div>
+  </div>
+
+  <div class="team-card">
+    <h3>Equipo 3 — Calidad de Datos y Producto</h3>
+    <div class="team-cat">4 personas | Categoría: Calidad</div>
+    <ul class="team-members">
+      <li>Yullieth Doria</li>
+      <li>Julibeth Jordan</li>
+      <li>Oscar Avendaño</li>
+      <li>Juan Carlos Goez Zapata</li>
+    </ul>
+    <div class="prompt-box">Crea un sistema de monitoreo de calidad de producto. Usa Cortex AI para clasificar causas de rechazo por proveedor y cosecha. Dashboard con alertas de calidad.</div>
+  </div>
+
+  <div class="team-card">
+    <h3>Equipo 4 — Agentes Comerciales</h3>
+    <div class="team-cat">4 personas | Categoría: Comercial</div>
+    <ul class="team-members">
+      <li>Yarelis Pinto</li>
+      <li>Rodolfo Pizarro</li>
+      <li>Ricardo Bolaños</li>
+      <li>Jose Jurado</li>
+    </ul>
+    <div class="prompt-box">Construye un agente de SI que actúe como asistente de ventas 24/7. Debe responder sobre inventario, precios, manejo de objeciones y sugerir productos. Lenguaje natural, español.</div>
+  </div>
+
+  <div class="team-card">
+    <h3>Equipo 5 — Ventas, Pedidos e Importaciones</h3>
+    <div class="team-cat">4 personas | Categoría: Comercial</div>
+    <ul class="team-members">
+      <li>Germán Centenaro</li>
+      <li>Sneyder Chacón</li>
+      <li>Leidy Ruiz</li>
+      <li>Angie Torres</li>
+    </ul>
+    <div class="prompt-box">Crea un dashboard de control de pedidos e importaciones. Incluye alertas de retraso, sugerencias de cross-sell basadas en historial, y KPIs de cumplimiento COMEX.</div>
+  </div>
+
+  <div class="team-card">
+    <h3>Equipo 6 — Logística y Bodega</h3>
+    <div class="team-cat">4 personas | Categoría: Logística</div>
+    <ul class="team-members">
+      <li>Gilberto Hernandez</li>
+      <li>Francisco Escorcia</li>
+      <li>Junior Gastelbondo</li>
+      <li>Maria Angel Montaño</li>
+    </ul>
+    <div class="prompt-box">Crea tablero operativo de bodega: KPIs de picking, recibo, almacenamiento, despacho. Alertas cuando capacidad >90%. Métricas de productividad por operario.</div>
+  </div>
+
+  <div class="team-card">
+    <h3>Equipo 7 — Experiencia del Colaborador</h3>
+    <div class="team-cat">3 personas | Categoría: RRHH</div>
+    <ul class="team-members">
+      <li>Sulamy Mercado</li>
+      <li>Jefferson de la Cruz</li>
+      <li>Esneyder Tobias</li>
+    </ul>
+    <div class="prompt-box">Crea un sistema de gestión de beneficios para colaboradores. Automatiza reconocimientos, envío de emails de cumpleaños, y cálculo de salario variable con reglas de negocio.</div>
+  </div>
+
+  <div class="team-card">
+    <h3>Equipo 8 — Nómina</h3>
+    <div class="team-cat">4 personas | Categoría: RRHH</div>
+    <ul class="team-members">
+      <li>Sergio de Arco</li>
+      <li>Vianys Gutierrez</li>
+      <li>Sebastian Escorcia</li>
+      <li>Josue de Alba</li>
+    </ul>
+    <div class="prompt-box">Desarrolla un detector de anomalías en nómina usando Cortex AI. Marca pagos inusuales (±2 desviaciones), genera alertas automáticas y reporte de hallazgos por período.</div>
+  </div>
+
+  <div class="team-card">
+    <h3>Equipo 9 — Tesorería y Análisis Financiero</h3>
+    <div class="team-cat">3 personas | Categoría: Finanzas</div>
+    <ul class="team-members">
+      <li>Dayra Saavedra</li>
+      <li>Hernan Soto</li>
+      <li>Andrea Tuiran</li>
+    </ul>
+    <div class="prompt-box">Crea dashboard de conciliación de pagos con tarjeta. Cruza datos de Redeban vs registros internos, detecta discrepancias automáticamente y genera reporte de brechas.</div>
+  </div>
+
+  <div class="team-card">
+    <h3>Equipo 10 — Compras y Compliance</h3>
+    <div class="team-cat">3 personas | Categoría: Finanzas</div>
+    <ul class="team-members">
+      <li>Jose Jimenez</li>
+      <li>Hellen Garcia</li>
+      <li>Heidy Sierra</li>
+    </ul>
+    <div class="prompt-box">Automatiza la generación de información exógena DIAN. Usa Cortex AI para extraer datos de contratos y generar reportes de compliance con validaciones automáticas.</div>
+  </div>
+
+  <div class="team-card">
+    <h3>Equipo 11 — Cobranzas y Auditoría</h3>
+    <div class="team-cat">4 personas | Categoría: Finanzas</div>
+    <ul class="team-members">
+      <li>Patricia Carvajalino</li>
+      <li>Sebastian Silvera</li>
+      <li>Carlos Orozco</li>
+      <li>Carlos Velasquez</li>
+    </ul>
+    <div class="prompt-box">Crea dashboard de gestión de cobranzas: cartera por casa externa, % recuperación, días mora promedio. Agente IA que responda preguntas sobre estado de cartera en lenguaje natural.</div>
+  </div>
+
+</div>
+</div>
+
+<div class="footer">
+  <p><strong>Cocothon Framework v2.0</strong> — Snowflake × Jamar | Generado con Cortex Code</p>
+</div>
+
+</div>
+</body>
+</html>

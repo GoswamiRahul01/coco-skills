@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tutorial CoCo — Cocothon {{EMPRESA}}</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=Lato:wght@300;400;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --sf-blue: #29B5E8;
+  --sf-dark: #11567F;
+  --navy: #0f172a;
+  --card-bg: #1e293b;
+  --green: #22c55e;
+  --orange: #f97316;
+  --purple: #8b5cf6;
+  --pink: #ec4899;
+  --yellow: #eab308;
+  --teal: #14b8a6;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Lato', sans-serif; background: var(--navy); color: #e2e8f0; line-height: 1.7; padding: 40px 20px; }
+.container { max-width: 1000px; margin: 0 auto; }
+h1 { font-family: 'Montserrat', sans-serif; font-size: 2.4rem; font-weight: 800; margin-bottom: 8px; }
+h1 span { color: var(--sf-blue); }
+h2 { font-family: 'Montserrat', sans-serif; font-size: 1.6rem; font-weight: 700; margin-top: 50px; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 2px solid var(--sf-blue); }
+h3 { font-family: 'Montserrat', sans-serif; font-size: 1.1rem; font-weight: 700; margin-top: 24px; margin-bottom: 8px; color: var(--sf-blue); }
+.subtitle { font-size: 1rem; color: #94a3b8; margin-bottom: 40px; }
+.section { background: var(--card-bg); border-radius: 12px; padding: 24px 28px; margin-bottom: 24px; border: 1px solid rgba(255,255,255,0.06); }
+.prompt-box { background: #0f172a; border: 1px solid rgba(41,181,232,0.3); border-radius: 8px; padding: 16px 20px; margin: 12px 0 20px 0; font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; color: #cbd5e1; white-space: pre-wrap; line-height: 1.6; position: relative; }
+.prompt-box::before { content: "PROMPT"; position: absolute; top: -10px; left: 12px; background: var(--sf-blue); color: #fff; font-size: 0.65rem; font-weight: 700; padding: 2px 8px; border-radius: 4px; font-family: 'Montserrat', sans-serif; }
+.result-box { background: rgba(34,197,94,0.05); border: 1px solid rgba(34,197,94,0.3); border-radius: 8px; padding: 16px 20px; margin: 12px 0 20px 0; font-size: 0.9rem; color: #86efac; position: relative; }
+.result-box::before { content: "RESULTADO"; position: absolute; top: -10px; left: 12px; background: var(--green); color: #fff; font-size: 0.65rem; font-weight: 700; padding: 2px 8px; border-radius: 4px; font-family: 'Montserrat', sans-serif; }
+.tip { background: rgba(139,92,246,0.08); border-left: 4px solid var(--purple); padding: 12px 16px; margin: 16px 0; border-radius: 0 8px 8px 0; font-size: 0.9rem; }
+.tip strong { color: var(--purple); }
+.step-num { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; background: var(--sf-blue); color: #fff; font-weight: 700; font-size: 0.8rem; border-radius: 50%; margin-right: 8px; }
+.team-prompt { background: var(--card-bg); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 20px; margin-bottom: 20px; }
+.team-prompt h4 { font-family: 'Montserrat', sans-serif; font-size: 0.95rem; margin-bottom: 4px; }
+.team-prompt .cat { font-size: 0.8rem; color: #94a3b8; margin-bottom: 12px; }
+.badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: 700; margin-right: 6px; }
+ol, ul { margin-left: 20px; margin-bottom: 12px; }
+li { margin-bottom: 6px; }
+.footer { margin-top: 50px; text-align: center; color: #475569; font-size: 0.8rem; padding: 20px 0; border-top: 1px solid rgba(255,255,255,0.06); }
+@media print { body { background: #fff; color: #1a1a2e; } .section { border: 1px solid #e2e8f0; background: #f8fafc; } .prompt-box { background: #f1f5f9; color: #334155; border-color: #94a3b8; } }
+</style>
+</head>
+<body>
+<div class="container">
+
+<h1>Tutorial <span>CoCo</span> — Cocothon {{EMPRESA}}</h1>
+<p class="subtitle">Todo lo que necesitas para construir tu solución. Copia, pega, ejecuta. | {{INDUSTRIA}}</p>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<h2>0. Demo de Apertura (para el SE — 5 min)</h2>
+<!-- ═══════════════════════════════════════════════════ -->
+
+<div class="section">
+<p>El SE ejecuta este prompt EN VIVO frente a todos. Es un ejemplo genérico e impactante que demuestra la velocidad de CoCo.</p>
+
+<h3>Prompt de Demo (copiar y ejecutar)</h3>
+<div class="prompt-box">Crea una base de datos DEMO_COCOTHON con 3 tablas de una tienda de café:
+- VENTAS (5000 filas): fecha, tienda, producto, cantidad, valor_total
+- PRODUCTOS (30 filas): id, nombre, categoria (bebidas/comida/postres), precio
+- TIENDAS (8 filas): id, nombre, ciudad, zona
+
+Genera datos realistas con estacionalidad (más ventas los fines de semana).
+
+Luego crea un Streamlit app con:
+- 3 KPI cards arriba: ventas totales del mes, ticket promedio, producto más vendido
+- Gráfico de barras: ventas por tienda
+- Gráfico de línea: tendencia diaria últimas 4 semanas
+- Tabla: top 10 productos por ingresos
+
+Usa altair para los gráficos. Todo en una sola pantalla.</div>
+
+<div class="tip"><strong>Tip para el SE:</strong> Mientras CoCo ejecuta (~2-3 min), explica brevemente: "Está creando las tablas, cargando datos, y construyendo la app. Ustedes van a hacer exactamente esto con su propio problema."</div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<h2>1. ¿Qué es Cortex Code (CoCo)?</h2>
+<!-- ═══════════════════════════════════════════════════ -->
+
+<div class="section">
+<p>CoCo es un asistente de IA que <strong>entiende español</strong> y puede:</p>
+<ul>
+  <li>Crear bases de datos y cargar datos</li>
+  <li>Construir dashboards (Streamlit) sin que sepas programar</li>
+  <li>Crear agentes inteligentes que responden preguntas en lenguaje natural</li>
+  <li>Analizar datos, detectar anomalías, generar reportes</li>
+  <li>Automatizar procesos repetitivos</li>
+</ul>
+
+<div class="tip"><strong>Cómo usarlo:</strong> Le escribes lo que necesitas como si hablaras con un colega experto. Él genera el código y lo ejecuta por ti.</div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<h2>2. Conceptos Clave (5 minutos)</h2>
+<!-- ═══════════════════════════════════════════════════ -->
+
+<div class="section">
+<h3>Snowflake = Tu plataforma de datos</h3>
+<ul>
+  <li><strong>Database</strong> — como una carpeta que contiene tus tablas</li>
+  <li><strong>Schema</strong> — subcarpetas dentro de la database</li>
+  <li><strong>Table</strong> — tus datos organizados en filas y columnas</li>
+  <li><strong>Warehouse</strong> — el "motor" que procesa tus consultas (ya está creado)</li>
+</ul>
+
+<h3>Streamlit = Tu dashboard</h3>
+<p>Una app web interactiva que se crea con Python. CoCo la genera por ti — tú solo describes lo que quieres ver.</p>
+
+<h3>Snowflake CoWork (Agente) = Tu asistente</h3>
+<p>Un chatbot que entiende tus datos. Le preguntas cosas y te responde con datos reales y gráficos.</p>
+
+<h3>Cortex AI = Inteligencia artificial</h3>
+<p>Funciones de IA que clasifican, resumen, analizan sentimiento, detectan anomalías. CoCo las usa automáticamente.</p>
+</div>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<h2>3. Cómo Pedir Cosas a CoCo</h2>
+<!-- ═══════════════════════════════════════════════════ -->
+
+<div class="section">
+<h3>Estructura de un buen prompt</h3>
+<ol>
+  <li><span class="step-num">1</span><strong>Qué quieres</strong> — "Crea un dashboard de..."</li>
+  <li><span class="step-num">2</span><strong>Con qué datos</strong> — "Usa la tabla X que tiene columnas Y, Z"</li>
+  <li><span class="step-num">3</span><strong>Cómo lo quieres</strong> — "Con filtros por fecha y gráfico de barras"</li>
+</ol>
+
+<h3>Ejemplo: Pedir un Dashboard</h3>
+<div class="prompt-box">Crea un Streamlit app que muestre un dashboard de ventas.
+Usa la tabla COCOTHON_{{EMPRESA}}.EQUIPO_N.VENTAS.
+Incluye:
+- KPI cards: total vendido, número de transacciones, ticket promedio
+- Gráfico de barras por categoría de producto
+- Filtro por rango de fechas
+- Tabla con detalle de las últimas 50 transacciones</div>
+
+<h3>Ejemplo: Pedir un Agente Inteligente</h3>
+<div class="prompt-box">Crea un agente de Snowflake CoWork que pueda responder 
+preguntas sobre la tabla DATOS. El agente debe:
+- Entender preguntas en español
+- Responder con datos y gráficos
+- Conocer las columnas: col1, col2, col3, col4</div>
+
+<h3>Ejemplo: Pedir Análisis</h3>
+<div class="prompt-box">Analiza la tabla REGISTROS y encuentra anomalías.
+Marca como sospechoso cualquier registro que esté a más de 2 
+desviaciones estándar del promedio.
+Muestra los resultados en un Streamlit con semáforo (verde/amarillo/rojo).</div>
+
+<div class="tip"><strong>Tip:</strong> Si algo no sale bien, simplemente pídele que lo corrija: "El gráfico no se ve bien, cámbialo a barras horizontales" o "Agrega un filtro por tienda".</div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<h2>4. Patrones Comunes</h2>
+<!-- ═══════════════════════════════════════════════════ -->
+
+<div class="section">
+<h3>Patrón A: Dashboard de KPIs</h3>
+<div class="prompt-box">Crea un Streamlit con KPI cards arriba (3-4 métricas principales),
+gráficos en el medio (barras + línea de tendencia), y tabla de 
+detalle abajo. Agrega filtros en el sidebar.</div>
+
+<h3>Patrón B: Agente que responde preguntas</h3>
+<div class="prompt-box">Crea una Semantic View sobre [TABLA] y configura un agente de 
+Snowflake CoWork que responda preguntas en español sobre 
+esos datos. Incluye métricas y dimensiones relevantes.</div>
+
+<h3>Patrón C: Detector de anomalías</h3>
+<div class="prompt-box">Analiza [TABLA] y detecta registros anómalos usando Cortex AI.
+Clasifica cada registro como NORMAL / SOSPECHOSO / CRÍTICO.
+Muestra los resultados en un dashboard con semáforo visual.</div>
+
+<h3>Patrón D: Automatización con alertas</h3>
+<div class="prompt-box">Crea un proceso automático que cada vez que lleguen nuevos datos 
+a [TABLA], verifique si hay [CONDICIÓN] y genere una alerta visual 
+en un dashboard. Incluye historial de alertas.</div>
+
+<h3>Patrón E: Clasificación con IA</h3>
+<div class="prompt-box">Usa Cortex AI para clasificar los registros de [TABLA] en 
+categorías: [CAT1, CAT2, CAT3]. Basado en el campo [TEXTO].
+Agrega la clasificación como columna nueva y muestra distribución.</div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<h2>5. Scripts Iniciales por Equipo</h2>
+<!-- ═══════════════════════════════════════════════════ -->
+
+<p style="color:#94a3b8; margin:16px 0;">Cada equipo copia su script, lo pega en CoCo, y ejecuta. Esto crea los datos de prueba y la primera versión de su solución.</p>
+
+<!-- {{SCRIPTS_POR_EQUIPO}}
+     Generar un bloque team-prompt por cada equipo. Formato:
+     
+     <div class="team-prompt">
+       <h4>Equipo N — NOMBRE_EQUIPO</h4>
+       <div class="cat">MIEMBROS separados por coma</div>
+       <div class="prompt-box">SCRIPT INICIAL COMPLETO del equipo.
+     Incluir:
+     - CREATE DATABASE/SCHEMA si aplica
+     - Descripción de tablas a crear con columnas y tipos
+     - Volúmenes de datos (N filas)
+     - Primer objetivo: "Luego crea un [Streamlit/Agente/Dashboard] que..."
+     - Especificar qué métricas/visualizaciones incluir</div>
+     </div>
+     
+     Cada script debe ser self-contained y ejecutable directamente en CoCo.
+     Personalizar según el problem_statement y categoría del equipo.
+-->
+{{SCRIPTS_POR_EQUIPO}}
+
+<!-- ═══════════════════════════════════════════════════ -->
+<h2>6. Tips Finales</h2>
+<!-- ═══════════════════════════════════════════════════ -->
+
+<div class="section">
+<ul>
+  <li><strong>No tengas miedo de pedir cosas grandes</strong> — CoCo puede crear apps completas en minutos</li>
+  <li><strong>Itera</strong> — Empieza simple y ve agregando features: "ahora agrega un filtro", "cambia los colores"</li>
+  <li><strong>Si algo falla</strong> — Dile: "Eso no funcionó, intenta de otra forma" o pide ayuda al mentor</li>
+  <li><strong>Combina patrones</strong> — Dashboard + Agente + Detector es una solución ganadora</li>
+  <li><strong>Presenta en vivo</strong> — El jurado quiere ver tu app corriendo, no slides</li>
+</ul>
+</div>
+
+<div class="footer">
+  <p><strong>Cocothon Framework v2.0</strong> — Snowflake × {{EMPRESA}} | {{INDUSTRIA}} | Generado con Cortex Code</p>
+</div>
+
+</div>
+</body>
+</html>

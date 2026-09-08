@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tutorial CoCo — Cocothon Jamar</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=Lato:wght@300;400;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --sf-blue: #29B5E8;
+  --sf-dark: #11567F;
+  --navy: #0f172a;
+  --card-bg: #1e293b;
+  --green: #22c55e;
+  --orange: #f97316;
+  --purple: #8b5cf6;
+  --pink: #ec4899;
+  --yellow: #eab308;
+  --teal: #14b8a6;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Lato', sans-serif; background: var(--navy); color: #e2e8f0; line-height: 1.7; padding: 40px 20px; }
+.container { max-width: 1000px; margin: 0 auto; }
+h1 { font-family: 'Montserrat', sans-serif; font-size: 2.4rem; font-weight: 800; margin-bottom: 8px; }
+h1 span { color: var(--sf-blue); }
+h2 { font-family: 'Montserrat', sans-serif; font-size: 1.6rem; font-weight: 700; margin-top: 50px; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 2px solid var(--sf-blue); }
+h3 { font-family: 'Montserrat', sans-serif; font-size: 1.1rem; font-weight: 700; margin-top: 24px; margin-bottom: 8px; color: var(--sf-blue); }
+.subtitle { font-size: 1rem; color: #94a3b8; margin-bottom: 40px; }
+.section { background: var(--card-bg); border-radius: 12px; padding: 24px 28px; margin-bottom: 24px; border: 1px solid rgba(255,255,255,0.06); }
+.prompt-box { background: #0f172a; border: 1px solid rgba(41,181,232,0.3); border-radius: 8px; padding: 16px 20px; margin: 12px 0 20px 0; font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; color: #cbd5e1; white-space: pre-wrap; line-height: 1.6; position: relative; }
+.prompt-box::before { content: "PROMPT"; position: absolute; top: -10px; left: 12px; background: var(--sf-blue); color: #fff; font-size: 0.65rem; font-weight: 700; padding: 2px 8px; border-radius: 4px; font-family: 'Montserrat', sans-serif; }
+.result-box { background: rgba(34,197,94,0.05); border: 1px solid rgba(34,197,94,0.3); border-radius: 8px; padding: 16px 20px; margin: 12px 0 20px 0; font-size: 0.9rem; color: #86efac; }
+.result-box::before { content: "RESULTADO"; position: absolute; top: -10px; left: 12px; background: var(--green); color: #fff; font-size: 0.65rem; font-weight: 700; padding: 2px 8px; border-radius: 4px; font-family: 'Montserrat', sans-serif; }
+.result-box { position: relative; }
+.tip { background: rgba(139,92,246,0.08); border-left: 4px solid var(--purple); padding: 12px 16px; margin: 16px 0; border-radius: 0 8px 8px 0; font-size: 0.9rem; }
+.tip strong { color: var(--purple); }
+.step-num { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; background: var(--sf-blue); color: #fff; font-weight: 700; font-size: 0.8rem; border-radius: 50%; margin-right: 8px; }
+.team-prompt { background: var(--card-bg); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 20px; margin-bottom: 20px; }
+.team-prompt h4 { font-family: 'Montserrat', sans-serif; font-size: 0.95rem; margin-bottom: 4px; }
+.team-prompt .cat { font-size: 0.8rem; color: #94a3b8; margin-bottom: 12px; }
+.badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: 700; margin-right: 6px; }
+ol, ul { margin-left: 20px; margin-bottom: 12px; }
+li { margin-bottom: 6px; }
+.footer { margin-top: 50px; text-align: center; color: #475569; font-size: 0.8rem; padding: 20px 0; border-top: 1px solid rgba(255,255,255,0.06); }
+@media print { body { background: #fff; color: #1a1a2e; } .section { border: 1px solid #e2e8f0; background: #f8fafc; } .prompt-box { background: #f1f5f9; color: #334155; border-color: #94a3b8; } }
+</style>
+</head>
+<body>
+<div class="container">
+
+<h1>Tutorial <span>CoCo</span> — Cocothon Jamar</h1>
+<p class="subtitle">Todo lo que necesitas para construir tu solución en 2 horas. Copia, pega, ejecuta.</p>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<h2>0. Demo de Apertura (para el SE — 5 min)</h2>
+<!-- ═══════════════════════════════════════════════════ -->
+
+<div class="section">
+<p>JuanPa ejecuta este prompt EN VIVO frente a todos. No es un problema de Jamar — es un ejemplo genérico e impactante que demuestra la velocidad de CoCo.</p>
+
+<h3>Prompt de Demo (copiar y ejecutar)</h3>
+<div class="prompt-box">Crea una base de datos DEMO_COCOTHON con 3 tablas de una tienda de café:
+- VENTAS (5000 filas): fecha, tienda, producto, cantidad, valor_total
+- PRODUCTOS (30 filas): id, nombre, categoria (bebidas/comida/postres), precio
+- TIENDAS (8 filas): id, nombre, ciudad, zona
+
+Genera datos realistas con estacionalidad (más ventas los fines de semana).
+
+Luego crea un Streamlit app con:
+- 3 KPI cards arriba: ventas totales del mes, ticket promedio, producto más vendido
+- Gráfico de barras: ventas por tienda
+- Gráfico de línea: tendencia diaria últimas 4 semanas
+- Tabla: top 10 productos por ingresos
+
+Usa altair para los gráficos. Todo en una sola pantalla.</div>
+
+<div class="tip"><strong>Tip para el SE:</strong> Mientras CoCo ejecuta (~2-3 min), explica brevemente: "Está creando las tablas, cargando datos, y construyendo la app. Ustedes van a hacer exactamente esto con su propio problema."</div>
+
+<!-- Una vez que el Streamlit está corriendo, muéstralo 30 segundos y cierra con:
+"Eso tardó 3 minutos. Ustedes van a tener 2 horas. ¿Listos?" -->
+</div>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<h2>1. ¿Qué es Cortex Code (CoCo)?</h2>
+<!-- ═══════════════════════════════════════════════════ -->
+
+<div class="section">
+<p>CoCo es un asistente de IA que <strong>entiende español</strong> y puede:</p>
+<ul>
+  <li>Crear bases de datos y cargar datos</li>
+  <li>Construir dashboards (Streamlit) sin que sepas programar</li>
+  <li>Crear agentes inteligentes que responden preguntas en lenguaje natural</li>
+  <li>Analizar datos, detectar anomalías, generar reportes</li>
+  <li>Automatizar procesos repetitivos</li>
+</ul>
+
+<div class="tip"><strong>Cómo usarlo:</strong> Le escribes lo que necesitas como si hablaras con un colega experto. Él genera el código y lo ejecuta por ti.</div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<h2>2. Conceptos Clave (5 minutos)</h2>
+<!-- ═══════════════════════════════════════════════════ -->
+
+<div class="section">
+<h3>Snowflake = Tu plataforma de datos</h3>
+<ul>
+  <li><strong>Database</strong> → como una carpeta que contiene tus tablas</li>
+  <li><strong>Schema</strong> → subcarpetas dentro de la database</li>
+  <li><strong>Table</strong> → tus datos organizados en filas y columnas</li>
+  <li><strong>Warehouse</strong> → el "motor" que procesa tus consultas (ya está creado, no se preocupen)</li>
+</ul>
+
+<h3>Streamlit = Tu dashboard</h3>
+<p>Una app web interactiva que se crea con Python. CoCo la genera por ti — tú solo describes lo que quieres ver.</p>
+
+<h3>Snowflake CoWork (Agente) = Tu asistente</h3>
+<p>Un chatbot que entiende tus datos. Le preguntas cosas como "¿cuáles son los clientes con más mora?" y te responde con datos reales y gráficos.</p>
+
+<h3>Cortex AI = Inteligencia artificial</h3>
+<p>Funciones de IA que clasifican, resumen, analizan sentimiento, detectan anomalías. CoCo las usa automáticamente cuando las necesitas.</p>
+</div>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<h2>3. Cómo Pedir Cosas a CoCo</h2>
+<!-- ═══════════════════════════════════════════════════ -->
+
+<div class="section">
+<h3>Estructura de un buen prompt</h3>
+<ol>
+  <li><span class="step-num">1</span><strong>Qué quieres</strong> — "Crea un dashboard de..."</li>
+  <li><span class="step-num">2</span><strong>Con qué datos</strong> — "Usa la tabla VENTAS que tiene columnas X, Y, Z"</li>
+  <li><span class="step-num">3</span><strong>Cómo lo quieres</strong> — "Con filtros por fecha y gráfico de barras"</li>
+</ol>
+
+<h3>Ejemplo: Pedir un Dashboard</h3>
+<div class="prompt-box">Crea un Streamlit app que muestre un dashboard de ventas.
+Usa la tabla COCOTHON_JAMAR.EQUIPO_9.VENTAS.
+Incluye:
+- KPI cards: total vendido, número de transacciones, ticket promedio
+- Gráfico de barras por categoría de producto
+- Filtro por rango de fechas
+- Tabla con detalle de las últimas 50 transacciones</div>
+
+<h3>Ejemplo: Pedir un Agente Inteligente</h3>
+<div class="prompt-box">Crea un agente de Snowflake CoWork que pueda responder 
+preguntas sobre la tabla CARTERA. El agente debe:
+- Entender preguntas en español
+- Responder con datos y gráficos
+- Conocer las columnas: cliente, monto_deuda, dias_mora, estado</div>
+
+<h3>Ejemplo: Pedir Análisis</h3>
+<div class="prompt-box">Analiza la tabla NOMINA_MENSUAL y encuentra anomalías.
+Marca como sospechoso cualquier pago que esté a más de 2 
+desviaciones estándar del promedio de ese cargo.
+Muestra los resultados en un Streamlit con semáforo (verde/amarillo/rojo).</div>
+
+<div class="tip"><strong>Tip:</strong> Si algo no sale bien, simplemente pídele que lo corrija: "El gráfico no se ve bien, cámbialo a barras horizontales" o "Agrega un filtro por tienda".</div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<h2>4. Patrones Comunes</h2>
+<!-- ═══════════════════════════════════════════════════ -->
+
+<div class="section">
+<h3>Patrón A: Dashboard de KPIs</h3>
+<div class="prompt-box">Crea un Streamlit con KPI cards arriba (3-4 métricas principales),
+gráficos en el medio (barras + línea de tendencia), y tabla de 
+detalle abajo. Agrega filtros en el sidebar.</div>
+
+<h3>Patrón B: Agente que responde preguntas</h3>
+<div class="prompt-box">Crea una Semantic View sobre [TABLA] y configura un agente de 
+Snowflake CoWork que responda preguntas en español sobre 
+esos datos. Incluye métricas de [X, Y, Z] y dimensiones de [A, B, C].</div>
+
+<h3>Patrón C: Detector de anomalías</h3>
+<div class="prompt-box">Analiza [TABLA] y detecta registros anómalos usando Cortex AI.
+Clasifica cada registro como NORMAL / SOSPECHOSO / CRÍTICO.
+Muestra los resultados en un dashboard con semáforo visual.</div>
+
+<h3>Patrón D: Automatización con alertas</h3>
+<div class="prompt-box">Crea un proceso automático que cada vez que lleguen nuevos datos 
+a [TABLA], verifique si hay [CONDICIÓN] y genere una alerta visual 
+en un dashboard. Incluye historial de alertas.</div>
+
+<h3>Patrón E: Clasificación con IA</h3>
+<div class="prompt-box">Usa Cortex AI para clasificar los registros de [TABLA] en 
+categorías: [CAT1, CAT2, CAT3]. Basado en el campo [TEXTO].
+Agrega la clasificación como columna nueva y muestra distribución.</div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<h2>5. Scripts Iniciales por Equipo</h2>
+<!-- ═══════════════════════════════════════════════════ -->
+
+<p style="color:#94a3b8; margin:16px 0;">Cada equipo copia su script, lo pega en CoCo, y ejecuta. Esto crea los datos de prueba y la primera versión de su solución. A partir de ahí, modifiquen y expandan.</p>
+
+<div class="team-prompt">
+<h4>Equipo 1 — Servicio al Cliente y CX</h4>
+<div class="cat">Sebastian Arteta, Jenny Morales, Marisela Reales, Alex Hernandez</div>
+<div class="prompt-box">Crea una base de datos COCOTHON_JAMAR con schema EQUIPO_1 y estas tablas:
+
+- PQRS (8000 filas): id_pqr, fecha_radicado, tipo (peticion/queja/reclamo/sugerencia), 
+  canal (telefono/email/chat/presencial), descripcion_texto (texto de 1-3 líneas realista 
+  sobre problemas con muebles: entrega tardía, producto dañado, garantía, servicio técnico),
+  estado (abierto/en_proceso/cerrado), dias_respuesta, satisfaccion_cliente (1-5)
+- CLIENTES (2000 filas): id_cliente, nombre, ciudad, segmento (hogar/empresarial), 
+  antiguedad_meses, valor_compras_acumulado
+- AGENTES_SERVICIO (25 filas): id_agente, nombre, turno, especialidad
+
+Los textos de descripcion deben ser variados y realistas para una empresa de muebles.
+Incluye estacionalidad (más quejas en diciembre por entregas navideñas).
+
+Luego crea un Streamlit app con:
+- KPIs: total PQRs abiertos, tiempo promedio respuesta, % satisfacción >3
+- Gráfico torta: distribución por tipo (P/Q/R/S)
+- Gráfico barras: PQRs por canal
+- Tabla: top 20 PQRs abiertas más antiguas
+- Filtros: rango fechas, tipo, canal, estado</div>
+</div>
+
+<div class="team-prompt">
+<h4>Equipo 2 — Analytics, BI y Gestión</h4>
+<div class="cat">Rubén Navarro, Rosell Romero, Diana Ayala, Kenny Guerrero</div>
+<div class="prompt-box">Crea una base de datos COCOTHON_JAMAR con schema EQUIPO_2 y estas tablas:
+
+- INICIATIVAS (80 filas): id_iniciativa, nombre, area_responsable (logistica/comercial/
+  finanzas/rrhh/ti/operaciones), estado (backlog/en_progreso/completada/bloqueada), 
+  prioridad (alta/media/baja), fecha_inicio, fecha_fin_estimada, porcentaje_avance, 
+  responsable, descripcion
+- METRICAS_OPERATIVAS (5000 filas): fecha, area, kpi_nombre (productividad/calidad/
+  cumplimiento/costo), valor_actual, meta, unidad
+- EMPLEADOS (200 filas): id_empleado, nombre, area, cargo, fecha_ingreso
+
+Los datos deben reflejar una empresa de retail de muebles con 6 áreas funcionales.
+Algunas iniciativas deben estar bloqueadas o retrasadas para que sea interesante.
+
+Luego crea un agente de Snowflake CoWork con una Semantic View que permita 
+preguntar en lenguaje natural sobre el estado de las iniciativas y las métricas 
+operativas. El agente debe poder responder: "¿Cuántas iniciativas están bloqueadas?",
+"¿Qué área tiene mejor cumplimiento?", "Muéstrame la tendencia de productividad".</div>
+</div>
+
+<div class="team-prompt">
+<h4>Equipo 3 — Calidad de Datos y Producto</h4>
+<div class="cat">Yullieth Doria, Julibeth Jordan, Oscar Avendaño, Juan Carlos Goez Zapata</div>
+<div class="prompt-box">Crea una base de datos COCOTHON_JAMAR con schema EQUIPO_3 y estas tablas:
+
+- PRODUCTOS (500 filas): id_producto, nombre_producto, categoria (sala/comedor/alcoba/
+  oficina/exterior), proveedor, pais_origen, material_principal, precio_venta
+- INSPECCIONES_CALIDAD (10000 filas): id_inspeccion, id_producto, fecha, lote, cosecha,
+  resultado (aprobado/rechazado/condicional), tipo_defecto (acabado/estructura/color/
+  dimensiones/empaque/ninguno), severidad (critico/mayor/menor/ninguno), inspector
+- PROVEEDORES (40 filas): id_proveedor, nombre, pais, calificacion_historica, 
+  num_inspecciones, tasa_rechazo_historica
+
+Los datos deben mostrar patrones: 2-3 proveedores con tasa de rechazo alta,
+1 cosecha problemática, y estacionalidad en defectos de empaque (temporada lluviosa).
+
+Luego crea un Streamlit app que muestre:
+- KPIs: tasa de aprobación global, proveedores en rojo (>15% rechazo), lotes críticos
+- Gráfico barras: tasa de rechazo por proveedor (con línea de umbral al 15%)
+- Gráfico línea: tendencia de calidad mensual
+- Heatmap: tipo de defecto vs categoría de producto
+- Tabla: últimas 50 inspecciones rechazadas con detalle</div>
+</div>
+
+<div class="team-prompt">
+<h4>Equipo 4 — Agentes Comerciales</h4>
+<div class="cat">Yarelis Pinto, Rodolfo Pizarro, Ricardo Bolaños, Jose Jurado</div>
+<div class="prompt-box">Crea una base de datos COCOTHON_JAMAR con schema EQUIPO_4 y estas tablas:
+
+- PRODUCTOS_CATALOGO (300 filas): id_producto, nombre, categoria (sala/comedor/alcoba/
+  oficina), subcategoria, precio, stock_disponible, margen_pct, descripcion (1 línea 
+  sobre el producto), materiales, dimensiones, garantia_meses
+- CLIENTES (3000 filas): id_cliente, nombre, ciudad, segmento (hogar/empresarial), 
+  credito_aprobado, credito_disponible, ultima_compra, num_compras_historicas
+- VENTAS_HISTORICAS (20000 filas): id_venta, id_cliente, id_producto, fecha, cantidad, 
+  valor_total, vendedor, canal (tienda/web/telefono)
+- OBJECIONES_COMUNES (30 filas): id, objecion_texto, respuesta_sugerida, categoria 
+  (precio/credito/tiempo_entrega/calidad/competencia)
+
+Los datos deben reflejar patrones de cross-sell (quien compra sala, suele comprar mesa auxiliar).
+
+Luego crea un agente de Snowflake CoWork que actúe como asistente de ventas:
+- Responda sobre disponibilidad y precios
+- Sugiera productos complementarios basado en historial
+- Maneje objeciones con las respuestas sugeridas
+- Consulte crédito disponible del cliente
+Todo en español, lenguaje natural.</div>
+</div>
+
+<div class="team-prompt">
+<h4>Equipo 5 — Ventas, Pedidos e Importaciones</h4>
+<div class="cat">Germán Centenaro, Sneyder Chacón, Leidy Ruiz, Angie Torres</div>
+<div class="prompt-box">Crea una base de datos COCOTHON_JAMAR con schema EQUIPO_5 y estas tablas:
+
+- PEDIDOS (8000 filas): id_pedido, id_cliente, fecha_pedido, fecha_entrega_prometida,
+  fecha_entrega_real (NULL si no entregado), estado (pendiente/en_transito/entregado/
+  cancelado), valor_total, canal, ciudad_destino
+- IMPORTACIONES (500 filas): id_importacion, proveedor_internacional, pais_origen, 
+  puerto_llegada, fecha_embarque, fecha_eta, fecha_llegada_real, contenedores, 
+  valor_usd, estado_aduanas (en_proceso/liberado/retenido), costo_almacenaje_dia
+- PRODUCTOS_PEDIDO (25000 filas): id_pedido, id_producto, cantidad, precio_unitario
+
+Incluir patrones: 15% de pedidos con retraso, importaciones de China con más demora 
+que las de Brasil, picos de pedidos en noviembre-diciembre.
+
+Luego crea un Streamlit app "COMEX Control Tower":
+- KPIs: pedidos en tránsito, % on-time delivery, importaciones retenidas
+- Mapa de calor: cumplimiento por ciudad destino
+- Timeline: importaciones activas con ETA vs real
+- Alertas: pedidos con >5 días de retraso, importaciones retenidas en aduana
+- Filtros: estado, canal, rango de fechas</div>
+</div>
+
+<div class="team-prompt">
+<h4>Equipo 6 — Logística y Bodega</h4>
+<div class="cat">Gilberto Hernandez, Francisco Escorcia, Junior Gastelbondo, Maria Angel Montaño</div>
+<div class="prompt-box">Crea una base de datos COCOTHON_JAMAR con schema EQUIPO_6 y estas tablas:
+
+- OPERACIONES_BODEGA (15000 filas): id_operacion, tipo (recibo/almacenamiento/picking/
+  despacho), fecha, hora_inicio, hora_fin, operario, zona_bodega (A/B/C/D/E), 
+  num_items, peso_kg, estado (completado/en_proceso/pendiente)
+- INVENTARIO (2000 filas): id_producto, zona_bodega, posicion, cantidad_actual,
+  cantidad_maxima, fecha_ultimo_movimiento, rotacion (alta/media/baja)
+- DESPACHOS (5000 filas): id_despacho, fecha, destino_ciudad, vehiculo, 
+  num_bultos, peso_total, hora_salida, hora_entrega, estado, km_recorridos
+
+Incluir patrones: zona C tiene más congestión, despachos viernes son más lentos,
+operarios del turno noche procesan 20% menos que turno día.
+
+Luego crea un Streamlit app con:
+- KPIs: capacidad utilizada por zona, despachos del día, productividad promedio
+- Gráfico: items procesados por hora (tendencia intradía)
+- Heatmap: ocupación por zona de bodega (verde/amarillo/rojo)
+- Tabla: despachos pendientes ordenados por prioridad
+- Alertas: zonas con >90% capacidad, despachos retrasados >2h</div>
+</div>
+
+<div class="team-prompt">
+<h4>Equipo 7 — Experiencia del Colaborador</h4>
+<div class="cat">Sulamy Mercado, Jefferson de la Cruz, Esneyder Tobias</div>
+<div class="prompt-box">Crea una base de datos COCOTHON_JAMAR con schema EQUIPO_7 y estas tablas:
+
+- EMPLEADOS (800 filas): id_empleado, nombre, area, cargo, fecha_ingreso, 
+  fecha_nacimiento, ciudad, tipo_contrato, salario_base, comision_pct (NULL si no aplica)
+- BENEFICIOS_LACAFE (2000 filas): id_beneficio, id_empleado, tipo (cafe/almuerzo/
+  bono_navidad/dia_cumpleanos/reconocimiento), fecha, valor, estado (activo/usado/vencido)
+- RECONOCIMIENTOS (500 filas): id, id_empleado, fecha, tipo (mejor_vendedor/antiguedad/
+  innovacion/servicio), otorgado_por, descripcion
+- SALARIO_VARIABLE (3000 filas): id_empleado, mes, ventas_realizadas, meta_ventas,
+  cumplimiento_pct, comision_calculada, bono_extra, total_variable
+
+Los cumpleañeros deben distribuirse uniformemente en el año. Incluir variabilidad 
+en cumplimiento de metas (algunos asesores >150%, otros <60%).
+
+Luego crea un Streamlit app con:
+- Pestaña 1: Cumpleañeros del mes actual con tarjeta visual por persona
+- Pestaña 2: Dashboard de salario variable por asesor (meta vs real)
+- Pestaña 3: Resumen de beneficios LaCafé usados vs disponibles
+- KPIs: cumpleañeros este mes, % uso beneficios, promedio cumplimiento metas</div>
+</div>
+
+<div class="team-prompt">
+<h4>Equipo 8 — Nómina</h4>
+<div class="cat">Sergio de Arco, Vianys Gutierrez, Sebastian Escorcia, Josue de Alba</div>
+<div class="prompt-box">Crea una base de datos COCOTHON_JAMAR con schema EQUIPO_8 y estas tablas:
+
+- NOMINA_MENSUAL (9600 filas = 800 empleados × 12 meses): id_empleado, mes, anio, 
+  salario_base, horas_extra, recargo_nocturno, bonificaciones, deducciones, 
+  seguridad_social, total_devengado, total_deducido, neto_pagar
+- EMPLEADOS (800 filas): id_empleado, nombre, area, cargo, fecha_ingreso, 
+  tipo_contrato, centro_costo, jefe_directo
+- PLANES_ENTRENAMIENTO (200 filas): id_plan, nombre_curso, area_destino, 
+  modalidad (presencial/virtual/mixta), duracion_horas, proveedor, costo, 
+  estado (programado/en_curso/completado/cancelado), fecha_inicio
+
+Incluir anomalías intencionales: 5 empleados con horas_extra sospechosamente altas 
+(>80h/mes), 3 con bonificaciones atípicas (>2x promedio del cargo), 2 duplicados 
+de pago en un mes específico.
+
+Luego crea un Streamlit "CoCo-Auditor" que:
+- Detecte anomalías automáticamente (±2 desviaciones por cargo)
+- Muestre semáforo: verde (normal), amarillo (revisar), rojo (crítico)
+- KPIs: total nómina mes, # anomalías detectadas, % empleados con alerta
+- Tabla: registros anómalos con explicación de por qué son sospechosos
+- Filtros: mes, área, tipo de anomalía</div>
+</div>
+
+<div class="team-prompt">
+<h4>Equipo 9 — Tesorería y Análisis Financiero</h4>
+<div class="cat">Dayra Saavedra, Hernan Soto, Andrea Tuiran</div>
+<div class="prompt-box">Crea una base de datos COCOTHON_JAMAR con schema EQUIPO_9 y estas tablas:
+
+- PAGOS_TARJETA (12000 filas): id_transaccion, fecha, hora, monto, tarjeta_tipo 
+  (visa/mastercard/amex), autorizacion_banco, tienda, terminal
+- CONCILIACION_REDEBAN (12000 filas): id_transaccion_redeban, fecha_proceso, monto,
+  comision, iva_comision, neto_abonado, fecha_abono, estado (conciliado/pendiente/
+  discrepancia)
+- CREDITOS_CARTERA (5000 filas): id_credito, id_cliente, pais (colombia/panama), 
+  monto_aprobado, monto_desembolsado, tasa_interes, plazo_meses, cuotas_pagadas,
+  cuotas_mora, valor_mora, fecha_desembolso, estado (al_dia/mora_30/mora_60/mora_90+)
+
+Incluir: 3% de transacciones con discrepancia en conciliación (monto no coincide), 
+Panamá con tasa de mora 2x mayor que Colombia.
+
+Luego crea un Streamlit app con:
+- Pestaña "Conciliación": KPIs de match rate, discrepancias del día, monto sin conciliar.
+  Tabla de discrepancias con detalle para revisión manual.
+- Pestaña "Créditos": comparación Colombia vs Panamá con brechas operativas.
+  Gráfico de mora por rango (30/60/90+), monto en riesgo por país.
+- Filtros: rango de fechas, tienda, país</div>
+</div>
+
+<div class="team-prompt">
+<h4>Equipo 10 — Compras y Compliance</h4>
+<div class="cat">Jose Jimenez, Hellen Garcia, Heidy Sierra</div>
+<div class="prompt-box">Crea una base de datos COCOTHON_JAMAR con schema EQUIPO_10 y estas tablas:
+
+- CONTRATOS (300 filas): id_contrato, proveedor, tipo (suministro/servicio/obra), 
+  valor, fecha_inicio, fecha_fin, estado (vigente/vencido/en_renovacion), area_solicitante,
+  aprobador, requiere_poliza (si/no), poliza_estado (vigente/vencida/sin_poliza)
+- PROVEEDORES (150 filas): id_proveedor, razon_social, nit, regimen_tributario 
+  (simplificado/comun/gran_contribuyente), actividad_economica, ciudad, 
+  retencion_fuente_pct, retencion_ica_pct
+- INFO_EXOGENA (5000 filas): anio_fiscal, nit_tercero, concepto_dian (honorarios/
+  servicios/compras/arrendamiento/otros), valor_base, retencion_aplicada, 
+  valor_iva, mes_causacion
+
+Los datos deben ser consistentes: retenciones calculadas correctamente según régimen,
+algunos contratos con póliza vencida (riesgo).
+
+Luego crea un Streamlit app con:
+- Pestaña "Exógena": resumen por concepto DIAN, validador de consistencia 
+  (retención vs régimen), alertas de datos faltantes
+- Pestaña "Contratos": estado de contratos, alertas de vencimiento próximo (30 días), 
+  pólizas vencidas
+- KPIs: contratos por vencer, proveedores sin info completa, total base gravable</div>
+</div>
+
+<div class="team-prompt">
+<h4>Equipo 11 — Cobranzas y Auditoría</h4>
+<div class="cat">Patricia Carvajalino, Sebastian Silvera, Carlos Orozco, Carlos Velasquez</div>
+<div class="prompt-box">Crea una base de datos COCOTHON_JAMAR con schema EQUIPO_11 y estas tablas:
+
+- CARTERA (10000 filas): id_obligacion, id_cliente, monto_original, saldo_actual,
+  dias_mora, fecha_vencimiento, casa_cobranza_asignada, estado (al_dia/mora_temprana/
+  mora_avanzada/castigo/acuerdo_pago), ultimo_pago_fecha, ultimo_pago_monto
+- GESTIONES_COBRANZA (30000 filas): id_gestion, id_obligacion, fecha, canal 
+  (llamada/sms/email/visita/whatsapp), resultado (contacto_efectivo/no_contesta/
+  promesa_pago/pago_realizado/rechazo), agente, duracion_seg
+- CASAS_EXTERNAS (8 filas): id_casa, nombre, zona_asignada, comision_base_pct, 
+  comision_exito_pct, cartera_asignada_total, recuperacion_acumulada
+
+Incluir patrones: 2 casas con recuperación <5% (bajo desempeño), 1 casa con >40% (top),
+promesas de pago que se cumplen solo 30% de las veces.
+
+Luego crea un Streamlit app + agente SI:
+- Dashboard: KPIs de recuperación, mora por rango, efectividad por casa externa
+- Ranking de casas: recuperación vs comisión (ROI por casa)
+- Gráfico: gestiones por canal y su tasa de éxito
+- Agente SI que responda: "¿Cuánto ha recuperado la casa X?", "¿Cuáles clientes 
+  tienen promesa de pago incumplida?", "Dame el resumen de cartera en mora >90 días"</div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<h2>6. Tips para las 2 Horas de Build</h2>
+<!-- ═══════════════════════════════════════════════════ -->
+
+<div class="section">
+<ol>
+  <li><strong>Ejecuten el script inicial primero</strong> — les da datos y una primera versión para modificar</li>
+  <li><strong>Iterar rápido</strong> — si algo no se ve bien, pidan a CoCo que lo ajuste: "cambia el gráfico", "agrega un filtro", "pon colores por estado"</li>
+  <li><strong>No reinventen la rueda</strong> — CoCo ya sabe crear dashboards, agentes, alertas. Solo descríbanle lo que necesitan.</li>
+  <li><strong>Dividan el trabajo</strong> — uno trabaja en el dashboard, otro en el agente, otro en el análisis. Al final integran.</li>
+  <li><strong>Piensen en la demo</strong> — ¿cómo van a mostrar esto en 3 minutos? El impacto > la complejidad técnica.</li>
+  <li><strong>Si se atoran</strong> — levanten la mano. Los mentores están para desbloquear, no para juzgar.</li>
+</ol>
+
+<div class="tip"><strong>El prompt mágico cuando algo falla:</strong> "No funcionó. El error dice [PEGAR ERROR]. Corrígelo."</div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<h2>7. Cómo Presentar (3 min por equipo)</h2>
+<!-- ═══════════════════════════════════════════════════ -->
+
+<div class="section">
+<ol>
+  <li><span class="step-num">1</span><strong>El Problema</strong> (30 seg): "Hoy en [ÁREA] tenemos este dolor..."</li>
+  <li><span class="step-num">2</span><strong>La Solución</strong> (30 seg): "Construimos un [dashboard/agente/detector] que..."</li>
+  <li><span class="step-num">3</span><strong>Demo en Vivo</strong> (90 seg): Mostrar la app corriendo, hacer una consulta al agente, señalar un insight</li>
+  <li><span class="step-num">4</span><strong>El Impacto</strong> (30 seg): "Esto nos ahorraría [X tiempo/dinero] porque [RAZÓN]"</li>
+</ol>
+
+<div class="tip"><strong>Recuerden:</strong> El jurado evalúa IMPACTO (30%), USO DE AI (25%), QUE FUNCIONE (25%), y STORYTELLING (20%). No necesitan algo perfecto — necesitan algo que funcione y que cuente una historia clara.</div>
+</div>
+
+<div class="footer">
+  <p><strong>Cocothon Jamar × Snowflake</strong> — Tutorial generado con Cortex Code</p>
+  <p>¿Dudas? Levanta la mano o escribe en el chat del evento.</p>
+</div>
+
+</div>
+</body>
+</html>

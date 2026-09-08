@@ -1,0 +1,38 @@
+skill_name: snowflake-hol-generator
+skill_type: internal
+promotion_stage: draft
+version: 1.0.0
+authors:
+- sfc-gh-jcastaneda
+submitter: JuanPa Castaneda
+validation:
+  testers:
+    count: 1
+    names:
+    - sfc-gh-jcastaneda
+customer_impact:
+  customers:
+    count: 0
+    names: []
+evidence_links: []
+notes: 'Generates complete Hands-On Lab (HOL) HTML workshops for Snowflake features.
+
+  Supports 11 industries, 5 cross-functional areas, and 11 feature modules.
+
+  Includes HTML/CSS/JS templates, QA checklist, and multi-language support (ES/EN).
+
+  '
+overlap_check:
+  max_score: 0.6312
+  highest_match: snowflake-presentation-builder
+  highest_match_source: local
+  method: local-embedding
+  checked_against_count: 125
+  checked_at: '2026-06-22T19:15:30Z'
+  highest_match_description: 'Build complete Snowflake presentations: research Snowflake
+    docs, create polished decks, HTML speaker notes, and SQL demo scripts. Use when:
+    building a snowflake presentation, creating a deck, creating'
+  highest_match_submitter: sfc-gh-aaburia
+  highest_match_testers:
+  - sfc-gh-aaburia
+  tool_overlap: 0.1429

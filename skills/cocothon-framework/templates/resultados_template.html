@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>COCOTHON {{EMPRESA}} — Reporte de Consumo y Soluciones</title>
+    <style>
+        :root {
+            --sf-primary: #29B5E8;
+            --sf-dark: #11567F;
+            --sf-gradient-start: #11567F;
+            --sf-gradient-end: #0a3a5c;
+            --info-blue: #e8f4fd;
+            --info-border: #29B5E8;
+            --warning-orange: #fff3e0;
+            --warning-border: #f57c00;
+            --success-green: #e8f5e9;
+            --success-border: #43a047;
+            --code-bg: #1a1a2e;
+            --sidebar-width: 260px;
+            --radius: 12px;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            line-height: 1.6;
+            color: #1a1a2e;
+            background: #f5f7fa;
+        }
+        .nav-sidebar {
+            position: fixed;
+            left: 0; top: 0;
+            width: var(--sidebar-width);
+            height: 100vh;
+            background: #fff;
+            border-right: 1px solid #e0e0e0;
+            overflow-y: auto;
+            z-index: 100;
+            padding: 20px 0;
+        }
+        .nav-sidebar .logo {
+            text-align: center;
+            padding: 10px 20px 20px;
+            border-bottom: 1px solid #eee;
+            margin-bottom: 15px;
+        }
+        .nav-sidebar .logo img { width: 140px; }
+        .nav-sidebar .logo h3 {
+            font-size: 13px;
+            color: var(--sf-dark);
+            margin-top: 8px;
+        }
+        .nav-link {
+            display: flex;
+            align-items: center;
+            padding: 10px 20px;
+            text-decoration: none;
+            color: #555;
+            font-size: 12px;
+            transition: all 0.2s;
+            border-left: 3px solid transparent;
+            cursor: pointer;
+        }
+        .nav-link:hover, .nav-link.active {
+            background: var(--info-blue);
+            color: var(--sf-dark);
+            border-left-color: var(--sf-primary);
+        }
+        .nav-link .step-num {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 22px; height: 22px;
+            border-radius: 50%;
+            background: #e0e0e0;
+            color: #555;
+            font-size: 11px;
+            font-weight: 700;
+            margin-right: 10px;
+            flex-shrink: 0;
+        }
+        .nav-link.active .step-num {
+            background: var(--sf-primary);
+            color: #fff;
+        }
+        .main-content {
+            margin-left: var(--sidebar-width);
+            padding: 0;
+        }
+        .hero {
+            background: linear-gradient(135deg, var(--sf-gradient-start), var(--sf-gradient-end));
+            color: #fff;
+            padding: 50px 40px;
+            text-align: center;
+        }
+        .hero img { width: 180px; margin-bottom: 15px; }
+        .hero h1 { font-size: 2rem; margin-bottom: 10px; font-weight: 700; }
+        .hero p { font-size: 1rem; opacity: 0.9; max-width: 700px; margin: 0 auto; }
+        .hero .meta {
+            margin-top: 18px;
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            font-size: 0.85rem;
+            opacity: 0.8;
+        }
+        .steps-container {
+            max-width: 950px;
+            margin: 0 auto;
+            padding: 30px 30px;
+        }
+        .step-card {
+            background: #fff;
+            border-radius: var(--radius);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            padding: 30px 35px;
+            margin-bottom: 25px;
+            display: none;
+        }
+        .step-card.active { display: block; }
+        .step-card h2 {
+            font-size: 1.4rem;
+            color: var(--sf-dark);
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .step-card h2 .num {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 34px; height: 34px;
+            border-radius: 50%;
+            background: var(--sf-primary);
+            color: #fff;
+            font-size: 15px;
+            flex-shrink: 0;
+        }
+        .step-card h3 {
+            font-size: 1.05rem;
+            color: #333;
+            margin: 20px 0 8px;
+        }
+        .step-card p, .step-card li {
+            color: #444;
+            font-size: 0.92rem;
+        }
+        .step-card ul, .step-card ol {
+            padding-left: 20px;
+            margin: 8px 0;
+        }
+        .step-card li { margin-bottom: 5px; }
+        .code-block {
+            position: relative;
+            background: var(--code-bg);
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 16px 20px;
+            margin: 12px 0;
+            overflow-x: auto;
+            font-family: 'SF Mono', 'Fira Code', monospace;
+            font-size: 12px;
+            line-height: 1.5;
+            white-space: pre-wrap;
+            color: #e0e0e0;
+        }
+        .code-block .copy-btn {
+            position: absolute;
+            top: 8px; right: 8px;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.3);
+            border-radius: 4px;
+            padding: 4px 10px;
+            font-size: 11px;
+            cursor: pointer;
+            color: #ccc;
+            transition: all 0.2s;
+        }
+        .code-block .copy-btn:hover {
+            background: var(--sf-primary);
+            color: #fff;
+            border-color: var(--sf-primary);
+        }
+        .info-box, .warning-box, .success-box {
+            padding: 14px 18px;
+            border-radius: 8px;
+            margin: 12px 0;
+            font-size: 0.88rem;
+            border-left: 4px solid;
+        }
+        .info-box { background: var(--info-blue); border-left-color: var(--info-border); }
+        .warning-box { background: var(--warning-orange); border-left-color: var(--warning-border); }
+        .success-box { background: var(--success-green); border-left-color: var(--success-border); }
+        .info-box strong, .warning-box strong, .success-box strong {
+            display: block;
+            margin-bottom: 4px;
+        }
+        .step-nav {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 25px;
+            padding-top: 18px;
+            border-top: 1px solid #eee;
+        }
+        .btn {
+            padding: 10px 22px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s;
+        }
+        .btn-primary { background: var(--sf-primary); color: #fff; }
+        .btn-primary:hover { background: var(--sf-dark); }
+        .btn-secondary { background: #f0f0f0; color: #555; }
+        .btn-secondary:hover { background: #e0e0e0; }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 12px 0;
+            font-size: 0.85rem;
+        }
+        th {
+            background: #f0f4f8;
+            padding: 10px 12px;
+            text-align: left;
+            font-weight: 600;
+            border-bottom: 2px solid #ddd;
+            color: var(--sf-dark);
+        }
+        td {
+            padding: 8px 12px;
+            border-bottom: 1px solid #eee;
+        }
+        tr:hover td { background: #f9fbfd; }
+        .credit-total { font-weight: 700; color: var(--sf-dark); }
+        .badge-ai { background: #e8f4fd; color: var(--sf-dark); padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 600; }
+        .badge-coco { background: #e8f5e9; color: #2e7d32; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 600; }
+        .badge-wh { background: #fff3e0; color: #e65100; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 600; }
+        .account-header {
+            background: linear-gradient(135deg, #f8f9fa, #e8f4fd);
+            border-radius: 8px;
+            padding: 15px 20px;
+            margin-bottom: 15px;
+            border-left: 4px solid var(--sf-primary);
+        }
+        .account-header h3 { color: var(--sf-dark); margin-bottom: 3px; }
+        .account-header .email { color: #666; font-size: 0.85rem; }
+        .prompt-label {
+            display: inline-block;
+            background: var(--sf-primary);
+            color: #fff;
+            padding: 3px 10px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        .chart-section {
+            margin: 20px 0;
+            text-align: center;
+        }
+        .chart-section img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+
+<nav class="nav-sidebar">
+    <div class="logo">
+        <!-- Logo Snowflake embebido como base64 PNG -->
+        <img src="{{LOGO_BASE64}}" alt="Snowflake">
+        <h3>COCOTHON {{EMPRESA}}</h3>
+    </div>
+    <a class="nav-link active" onclick="showStep(0)"><span class="step-num">R</span>Resumen General</a>
+<!-- {{NAV_LINKS}}
+     Generar un nav-link por cada cuenta. Formato:
+     
+     <a class="nav-link" onclick="showStep(N)"><span class="step-num">N</span>LABEL_CUENTA</a>
+     
+     Donde N es el índice (1-based) y LABEL_CUENTA es un identificador corto
+     (email truncado o nombre del equipo).
+-->
+{{NAV_LINKS}}
+</nav>
+
+<div class="main-content">
+    <div class="hero">
+        <!-- Logo blanco para hero sobre fondo oscuro -->
+        <img src="{{LOGO_WHITE_BASE64}}" alt="Snowflake">
+        <h1>COCOTHON {{EMPRESA}} — Reporte de Consumo</h1>
+        <p>Detalle de créditos consumidos y soluciones construidas por cada equipo participante</p>
+        <div class="meta">
+            <span>Fecha: {{FECHA}}</span>
+            <span>{{N_CUENTAS}} Cuentas Activas</span>
+            <span>{{TOTAL_CREDITOS}} Créditos Totales</span>
+        </div>
+    </div>
+
+    <div class="steps-container">
+
+<!-- STEP 0: RESUMEN -->
+<div class="step-card active">
+    <h2><span class="num">R</span>Resumen General de Consumo</h2>
+    
+    <h3>Consumo Total por Cuenta</h3>
+<!-- {{TABLA_CREDITOS}}
+     Generar tabla con el consolidado de créditos. Formato:
+     
+     <table>
+         <thead>
+             <tr><th>#</th><th>Cuenta</th><th>Asignado a</th><th>Cortex Code</th><th>Warehouse</th><th>AI*</th><th>Otros</th><th>TOTAL</th></tr>
+         </thead>
+         <tbody>
+             <tr><td>1</td><td>ACCOUNT_ID</td><td>EMAIL</td><td>X.XX</td><td>X.XX</td><td>X.XXX</td><td>X.XX</td><td class="credit-total">XX.XX</td></tr>
+             ...
+             <tr style="background:#f0f4f8; font-weight:700;"><td></td><td colspan="2">TOTAL</td><td>XX.XX</td><td>XX.XX</td><td>X.XX</td><td>X.XX</td><td class="credit-total">XXX.XX</td></tr>
+         </tbody>
+     </table>
+     
+     Categorías de créditos:
+     - Cortex Code = CORTEX_CODE_DESKTOP + CORTEX_CODE_SNOWSIGHT
+     - Warehouse = WAREHOUSE_METERING
+     - AI = AI_FUNCTIONS + AI_SERVICES + SNOWFLAKE_INTELLIGENCE
+     - Otros = SPCS + SERVERLESS_TASK + COPY_FILES + TELEMETRY + demás
+-->
+{{TABLA_CREDITOS}}
+
+    <h3>Distribución por Categoría</h3>
+    <!-- Chart: pie chart base64 generado con references/chart-templates.md -->
+    <div class="chart-section">
+        <img src="{{PIE_CHART_BASE64}}" alt="Distribución de créditos por categoría">
+    </div>
+
+    <h3>Consumo por Equipo</h3>
+    <!-- Chart: bar chart horizontal base64 -->
+    <div class="chart-section">
+        <img src="{{BAR_CHART_BASE64}}" alt="Créditos por equipo">
+    </div>
+
+    <h3>Actividad durante el Evento</h3>
+    <!-- Chart: timeline base64 -->
+    <div class="chart-section">
+        <img src="{{TIMELINE_CHART_BASE64}}" alt="Timeline de actividad">
+    </div>
+
+    <div class="step-nav">
+        <span></span>
+        <button class="btn btn-primary" onclick="showStep(1)">Ver Cuenta 1 &rarr;</button>
+    </div>
+</div>
+
+<!-- {{SECCIONES_CUENTAS}}
+     Generar un step-card por cada cuenta. Formato:
+     
+     <div class="step-card">
+         <div class="account-header">
+             <h3>COCOTHON_{{EMPRESA}}_ACCOUNT_ID</h3>
+             <span class="email">EMAIL_ASIGNADO</span>
+         </div>
+         <h2><span class="num">N</span>NOMBRE_SOLUCION</h2>
+         
+         <h3>Créditos Consumidos</h3>
+         <table>
+             <thead><tr><th>Servicio</th><th>Créditos</th></tr></thead>
+             <tbody>
+                 <tr><td>SERVICE_TYPE</td><td>X.XXXX</td></tr>
+                 ...
+                 <tr style="font-weight:700;background:#f0f4f8;"><td>TOTAL</td><td>XX.XXXX</td></tr>
+             </tbody>
+         </table>
+     
+         <h3>Descripción de la Solución</h3>
+         <p>DESCRIPCION inferida de queries AI + databases creadas</p>
+         <ul>
+             <li><strong>Modelos:</strong> modelos LLM usados</li>
+             <li><strong>Tipo:</strong> Streamlit / Agent / Notebook / etc.</li>
+             <li><strong>Databases:</strong> DBs creadas</li>
+         </ul>
+     
+         <h3>Prompt para Regenerar la Solución</h3>
+         <span class="prompt-label">PROMPT COMPLETO</span>
+         <div class="code-block"><button class="copy-btn" onclick="copyCode(this)">Copiar</button>PROMPT_RECONSTRUIDO</div>
+     
+         <div class="step-nav">
+             <button class="btn btn-secondary" onclick="showStep(N-1)">&larr; Anterior</button>
+             <button class="btn btn-primary" onclick="showStep(N+1)">Siguiente &rarr;</button>
+         </div>
+     </div>
+     
+     Para la última cuenta, el botón "Siguiente" debe volver al resumen:
+     <button class="btn btn-primary" onclick="showStep(0)">Volver al Resumen</button>
+-->
+{{SECCIONES_CUENTAS}}
+
+    </div><!-- steps-container -->
+</div><!-- main-content -->
+
+<script>
+function showStep(n) {
+    const cards = document.querySelectorAll('.step-card');
+    const links = document.querySelectorAll('.nav-link');
+    cards.forEach(c => c.classList.remove('active'));
+    links.forEach(l => l.classList.remove('active'));
+    cards[n].classList.add('active');
+    links[n].classList.add('active');
+    window.scrollTo({top: 0, behavior: 'smooth'});
+}
+
+function copyCode(btn) {
+    const block = btn.parentElement;
+    const text = block.textContent.replace('Copiar', '').trim();
+    navigator.clipboard.writeText(text).then(() => {
+        btn.textContent = 'Copiado!';
+        setTimeout(() => btn.textContent = 'Copiar', 2000);
+    });
+}
+</script>
+</body>
+</html>

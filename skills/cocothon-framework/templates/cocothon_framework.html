@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cocothon Framework — Marco de Referencia</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+<script>mermaid.initialize({startOnLoad:true, securityLevel:'loose', theme:'default', themeVariables:{fontSize:'13px'}, flowchart:{useMaxWidth:false, nodeSpacing:50, rankSpacing:60}});</script>
+<style>
+  :root {
+    --sf-blue: #29B5E8;
+    --sf-dark: #11567F;
+    --sf-navy: #0a3a5c;
+    --sf-text: #2d3748;
+    --sf-light: #f7fafc;
+    --sf-border: #e2e8f0;
+    --sf-green: #38a169;
+    --sf-orange: #dd6b20;
+    --sf-purple: #6b46c1;
+    --sf-pink: #d53f8c;
+    --sf-yellow: #d69e2e;
+    --sf-teal: #00C9A7;
+    --radius: 10px;
+    --content-max: 900px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+    color: var(--sf-text);
+    line-height: 1.7;
+    background: #f0f4f8;
+    font-size: 15px;
+  }
+  .header {
+    background: linear-gradient(135deg, var(--sf-dark) 0%, var(--sf-navy) 100%);
+    color: white;
+    padding: 60px 40px;
+    text-align: center;
+  }
+  .header img { height: 50px; margin-bottom: 20px; }
+  .header h1 {
+    font-size: 36px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 12px;
+  }
+  .header .subtitle {
+    font-size: 17px;
+    opacity: 0.9;
+    max-width: 700px;
+    margin: 0 auto;
+  }
+  .header .badge-row {
+    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .header .badge {
+    background: rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.3);
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+  }
+  .container {
+    max-width: var(--content-max);
+    margin: 0 auto;
+    padding: 40px 30px;
+    background: white;
+    min-height: 100vh;
+  }
+  .toc {
+    background: var(--sf-light);
+    border-radius: var(--radius);
+    padding: 24px 30px;
+    margin-bottom: 40px;
+  }
+  .toc h2 { border: none; margin: 0 0 12px; font-size: 16px; color: var(--sf-dark); }
+  .toc ol { padding-left: 20px; columns: 2; column-gap: 30px; }
+  .toc li { margin-bottom: 6px; font-size: 14px; }
+  .toc a { color: var(--sf-dark); text-decoration: none; }
+  .toc a:hover { color: var(--sf-blue); }
+  h2 {
+    color: var(--sf-dark);
+    font-size: 22px;
+    font-weight: 700;
+    margin: 48px 0 16px;
+    padding-bottom: 10px;
+    border-bottom: 3px solid var(--sf-blue);
+  }
+  h3 {
+    color: var(--sf-dark);
+    font-size: 17px;
+    font-weight: 700;
+    margin: 28px 0 12px;
+  }
+  h4 { color: var(--sf-text); font-size: 15px; font-weight: 700; margin: 20px 0 8px; }
+  p { margin-bottom: 14px; }
+  .callout {
+    border-left: 4px solid var(--sf-blue);
+    background: #ebf8ff;
+    padding: 16px 20px;
+    border-radius: 0 var(--radius) var(--radius) 0;
+    margin: 20px 0;
+  }
+  .callout.warning { background: #fffbeb; border-left-color: var(--sf-orange); }
+  .callout.success { background: #f0fff4; border-left-color: var(--sf-green); }
+  .callout.purple { background: #faf5ff; border-left-color: var(--sf-purple); }
+  .callout strong { display: block; margin-bottom: 4px; }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 16px 0;
+    font-size: 14px;
+  }
+  th {
+    background: var(--sf-dark);
+    color: white;
+    padding: 12px 14px;
+    text-align: left;
+    font-weight: 600;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  td {
+    padding: 11px 14px;
+    border-bottom: 1px solid var(--sf-border);
+    vertical-align: top;
+  }
+  tr:nth-child(even) td { background: var(--sf-light); }
+  ul, ol { margin: 8px 0 16px 24px; }
+  li { margin-bottom: 8px; }
+  .stat-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin: 24px 0;
+  }
+  .stat-card {
+    background: linear-gradient(135deg, var(--sf-dark), var(--sf-navy));
+    color: white;
+    padding: 20px;
+    border-radius: var(--radius);
+    text-align: center;
+  }
+  .stat-card .num { font-size: 32px; font-weight: 800; color: var(--sf-blue); }
+  .stat-card .label { font-size: 12px; text-transform: uppercase; letter-spacing: 1px; opacity: 0.85; margin-top: 4px; }
+  .timeline {
+    position: relative;
+    padding-left: 30px;
+    margin: 20px 0;
+  }
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 8px;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: var(--sf-blue);
+    border-radius: 2px;
+  }
+  .timeline-item {
+    position: relative;
+    margin-bottom: 16px;
+    padding: 12px 16px;
+    background: var(--sf-light);
+    border-radius: var(--radius);
+  }
+  .timeline-item::before {
+    content: '';
+    position: absolute;
+    left: -26px;
+    top: 16px;
+    width: 12px;
+    height: 12px;
+    background: var(--sf-blue);
+    border-radius: 50%;
+    border: 3px solid white;
+  }
+  .timeline-item .time { font-weight: 700; color: var(--sf-dark); font-size: 13px; }
+  .timeline-item .desc { margin-top: 4px; }
+  .checklist { list-style: none; padding-left: 0; }
+  .checklist li {
+    padding: 8px 0 8px 32px;
+    position: relative;
+    border-bottom: 1px solid var(--sf-border);
+  }
+  .checklist li::before {
+    content: '☐';
+    position: absolute;
+    left: 4px;
+    font-size: 16px;
+  }
+  .industry-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin: 16px 0;
+  }
+  .industry-card {
+    border: 1px solid var(--sf-border);
+    border-radius: var(--radius);
+    padding: 16px;
+  }
+  .industry-card h4 { margin: 0 0 8px; color: var(--sf-dark); }
+  .industry-card ol { margin: 0; padding-left: 18px; font-size: 13px; }
+  .industry-card li { margin-bottom: 4px; }
+  .flow-diagram {
+    background: var(--sf-light);
+    border-radius: var(--radius);
+    padding: 24px;
+    text-align: center;
+    font-family: monospace;
+    font-size: 13px;
+    line-height: 1.8;
+    margin: 20px 0;
+    white-space: pre;
+  }
+  .footer {
+    text-align: center;
+    padding: 40px;
+    color: #718096;
+    font-size: 12px;
+    border-top: 1px solid var(--sf-border);
+    margin-top: 50px;
+  }
+  @media print {
+    @page { size: A4; margin: 15mm 12mm 20mm 12mm; }
+    body { background: white; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .header { -webkit-print-color-adjust: exact; print-color-adjust: exact; padding: 40px 30px; }
+    .container { padding: 20px 10px; max-width: 100%; box-shadow: none; }
+    .stat-card { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .timeline-item { break-inside: avoid; page-break-inside: avoid; }
+    .callout { break-inside: avoid; page-break-inside: avoid; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .industry-card { break-inside: avoid; page-break-inside: avoid; }
+    table { break-inside: auto; }
+    tr { break-inside: avoid; page-break-inside: avoid; }
+    th { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    h2 { break-after: avoid; }
+    .badge { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .footer { break-before: avoid; }
+    a { text-decoration: none; color: var(--sf-dark); }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <img src="https://www.logo.wine/a/logo/Snowflake_Inc./Snowflake_Inc.-Logo.wine.svg" alt="Snowflake">
+  <h1>Cocothon Framework</h1>
+  <p class="subtitle">Hackathons estructurados con Cortex Code para resolver problemas reales de negocio — Diseñado para clientes y prospectos</p>
+  <div class="badge-row">
+    <span class="badge">Multi-industria</span>
+    <span class="badge">3 horas — 3 días</span>
+    <span class="badge">Negocio + Técnico</span>
+    <span class="badge">Cortex Code Powered</span>
+  </div>
+</div>
+
+<div class="container">
+
+<!-- Stats -->
+<div class="stat-grid">
+  <div class="stat-card">
+    <div class="num">3h+</div>
+    <div class="label">Duración mínima</div>
+  </div>
+  <div class="stat-card">
+    <div class="num">2</div>
+    <div class="label">Perfiles: Negocio + Técnico</div>
+  </div>
+  <div class="stat-card">
+    <div class="num">6+</div>
+    <div class="label">Industrias cubiertas</div>
+  </div>
+</div>
+
+<!-- TOC -->
+<div class="toc">
+  <h2>Contenido</h2>
+  <ol>
+    <li><a href="#s1">¿Qué es una Cocothon?</a></li>
+    <li><a href="#s2">Objetivos</a></li>
+    <li><a href="#s3">Modalidades</a></li>
+    <li><a href="#s4">Roles y Participantes</a></li>
+    <li><a href="#s5">Estructura del Evento</a></li>
+    <li><a href="#s6">Criterios de Evaluación</a></li>
+    <li><a href="#s7">Herramientas y Stack</a></li>
+    <li><a href="#s8">Problem Statements por Industria</a></li>
+    <li><a href="#s9">Premiación</a></li>
+    <li><a href="#s10">Post-evento y Scaling</a></li>
+    <li><a href="#s11">Gobernanza</a></li>
+    <li><a href="#s12">Checklist de Preparación</a></li>
+    <li><a href="#s13">Mejores Prácticas</a></li>
+    <li><a href="#s14">ISF Reference</a></li>  </ol>
+</div>
+
+<!-- Section 1 -->
+<h2 id="s1">1. ¿Qué es una Cocothon?</h2>
+
+<p>Una <strong>Cocothon</strong> es un hackathon estructurado (mínimo 3 horas) diseñado para <strong>clientes y prospectos</strong>, donde equipos mixtos (negocio + técnicos) resuelven problemas reales de su organización utilizando <strong>Cortex Code (Coco)</strong> y la plataforma Snowflake. Los participantes se llevan una solución funcional que demuestra valor tangible desde el día uno.</p>
+
+<h3>Relación con el ISF</h3>
+<p>El <strong>ISF (Industry Solutions Framework)</strong> es el repositorio centralizado de Snowflake para demos orientadas a outcomes, skills de Cortex Code y assets de GTM por industria. La Cocothon es el <strong>"Push Motion"</strong> dentro del ISF — un mecanismo estructurado para alimentar el framework con soluciones validadas en campo.</p>
+
+<div class="flow-diagram">┌─────────────────────────────────────┐
+│   Industry Solutions Framework      │
+│   (Repositorio central)             │
+└──────────────┬──────────────────────┘
+               │
+  ┌────────────┼────────────────┐
+  │                             │
+┌─▼──────────────┐   ┌─────────▼──────────┐
+│ Push Motion    │   │ Organic Motion     │
+│ (COCOTHON)     │   │ (Demos hero)       │
+│                │   │                    │
+│ • Estructurado │   │ • Individual       │
+│ • Multi-equipo │   │ • Sin deadline     │
+│ • Time-boxed   │   │ • Umbral calidad   │
+│ • Evaluado     │   │ • Espontáneo       │
+└────────────────┘   └────────────────────┘</div>
+
+<!-- Section 2 -->
+<h2 id="s2">2. Objetivos</h2>
+<ul>
+  <li><strong>Demostrar valor real</strong> — El cliente resuelve SU problema con Snowflake en una sesión</li>
+  <li><strong>Involucrar negocio + técnicos</strong> — Ambos perfiles del cliente participan y validan juntos</li>
+  <li><strong>Acelerar decisiones</strong> — Convertir prospectos en oportunidades concretas con evidencia tangible</li>
+  <li><strong>Generar assets reutilizables</strong> — Skills, demos, semantic views, agents para escalar</li>
+  <li><strong>Fortalecer relación</strong> — Co-creación que genera confianza y ownership del lado del cliente</li>
+  <li><strong>Reducir ciclo de venta</strong> — El cliente se lleva un MVP funcional, no una presentación</li>
+</ul>
+
+<!-- Section 3 -->
+<h2 id="s3">3. Modalidades</h2>
+
+<table>
+  <tr><th>Modalidad</th><th>Duración</th><th>Equipos</th><th>Objetivo</th></tr>
+  <tr><td><strong>Standard</strong></td><td>3-4 horas</td><td>3-5 equipos de 3-4</td><td>Resolver un problema completo, entregar MVP funcional</td></tr>
+  <tr><td><strong>Full Day</strong></td><td>6-8 horas</td><td>4-7 equipos de 4-5</td><td>Múltiples use cases, soluciones más robustas</td></tr>
+  <tr><td><strong>Extended</strong></td><td>2-3 días</td><td>5-10 equipos de 4-5</td><td>Producción de skills/apps listas para piloto</td></tr>
+</table>
+
+<div class="callout">
+  <strong>Recomendación:</strong> Para una primera Cocothon, la modalidad Standard (3-4 horas) es ideal — suficiente para que los equipos entiendan el reto, construyan, y presenten una solución funcional.
+</div>
+
+<!-- Section 4 -->
+<h2 id="s4">4. Roles y Participantes</h2>
+
+<h3>Equipo Snowflake</h3>
+<table>
+  <tr><th>Rol</th><th>Responsabilidad</th></tr>
+  <tr><td><strong>AE (Organizador)</strong></td><td>Convoca, define agenda, gestiona relación con el cliente, presenta la Cocothon, coordina logística</td></tr>
+  <tr><td><strong>SE (Facilitador técnico)</strong></td><td>Prepara datos y cuentas, facilita durante el build, resuelve problemas técnicos, evalúa soluciones</td></tr>
+  <tr><td><strong>Industry Principal / FCTO</strong></td><td>Aporta contexto de industria, define problem statements, participa como jurado (opcional)</td></tr>
+</table>
+
+<h3>Equipo del Cliente / Prospecto</h3>
+<table>
+  <tr><th>Perfil</th><th>Quién</th><th>Aporta</th></tr>
+  <tr><td><strong>Perfil de Negocio</strong></td><td>Gerentes de área, directores, product owners, analistas de negocio</td><td>Contexto del problema, validación de valor, criterios de éxito, priorización</td></tr>
+  <tr><td><strong>Perfil Técnico</strong></td><td>Data engineers, analistas de datos, desarrolladores, DBAs</td><td>Conocimiento de los datos, implementación, queries, integración con sistemas existentes</td></tr>
+</table>
+
+<div class="callout success">
+  <strong>Composición ideal de cada equipo:</strong> 1-2 personas de negocio + 1-2 personas técnicas del cliente + 1 SE de Snowflake como facilitador. Esto garantiza que la solución resuelve un problema real Y es técnicamente viable.
+</div>
+
+<h3>Jurado (2-3 personas)</h3>
+<ul>
+  <li>Sponsor ejecutivo del cliente (VP, Director, C-level)</li>
+  <li>SE o Industry Principal de Snowflake</li>
+  <li>Partner técnico (si aplica)</li>
+</ul>
+
+<!-- Section 5 -->
+<h2 id="s5">5. Estructura del Evento</h2>
+
+<h3>Pre-evento (1-2 semanas antes)</h3>
+<ol>
+  <li><strong>Selección de cuentas</strong> — Baja adopción, oportunidad abierta, caso de uso claro</li>
+  <li><strong>Problem Statements</strong> — 2-7 problemas concretos alineados al ISF</li>
+  <li><strong>Preparación de datos</strong> — Datos del cliente o sintéticos en sandbox</li>
+  <li><strong>Briefing a equipos</strong> — Problem statements, acceso a datos, skills disponibles</li>
+  <li><strong>Setup técnico</strong> — Cuentas HOL, Cortex Code instalado, skills preloaded</li>
+</ol>
+
+<h3>Día del evento (formato Standard — 3.5 horas)</h3>
+
+<div class="timeline">
+  <div class="timeline-item">
+    <div class="time">0:00 — 0:20</div>
+    <div class="desc"><strong>Kick-off (AE presenta):</strong> Bienvenida, qué es la Cocothon, agenda, problem statements, criterios de evaluación</div>
+  </div>
+  <div class="timeline-item">
+    <div class="time">0:20 — 0:40</div>
+    <div class="desc"><strong>Planificación:</strong> Equipos analizan su reto, definen estrategia de solución, priorizan qué construir</div>
+  </div>
+  <div class="timeline-item">
+    <div class="time">0:40 — 2:30</div>
+    <div class="desc"><strong>Build:</strong> Construcción con Cortex Code (SE facilita, perfiles técnicos implementan, negocio valida y orienta)</div>
+  </div>
+  <div class="timeline-item">
+    <div class="time">2:30 — 2:45</div>
+    <div class="desc"><strong>Demo prep:</strong> Equipos preparan pitch de 5 minutos (negocio presenta el valor, técnico muestra la solución)</div>
+  </div>
+  <div class="timeline-item">
+    <div class="time">2:45 — 3:15</div>
+    <div class="desc"><strong>Show & Tell:</strong> Cada equipo presenta su solución + Q&A del jurado</div>
+  </div>
+  <div class="timeline-item">
+    <div class="time">3:15 — 3:30</div>
+    <div class="desc"><strong>Deliberación, premiación y próximos pasos</strong></div>
+  </div>
+</div>
+
+<!-- Section 6 -->
+<h2 id="s6">6. Criterios de Evaluación</h2>
+
+<p>Los criterios son generales y aplican a <strong>cualquier caso de uso</strong> independientemente de la industria o el problema específico que resuelva cada equipo:</p>
+
+<table>
+  <tr><th>Criterio</th><th>Peso</th><th>Descripción</th></tr>
+  <tr><td><strong>Impacto de Negocio</strong></td><td>30%</td><td>¿Resuelve un problema real del cliente? ¿El beneficio es cuantificable o medible? ¿Quién se beneficia?</td></tr>
+  <tr><td><strong>Viabilidad</strong></td><td>25%</td><td>¿Es implementable en producción? ¿Qué tan cerca está de ser productivo con esfuerzo razonable?</td></tr>
+  <tr><td><strong>Uso de la Plataforma</strong></td><td>20%</td><td>¿Aprovecha las capacidades de Snowflake de forma efectiva? (AI, sharing, marketplace, governance, etc.)</td></tr>
+  <tr><td><strong>Completitud</strong></td><td>15%</td><td>¿La solución funciona end-to-end? ¿Es demostrable? ¿Tiene una experiencia de usuario clara?</td></tr>
+  <tr><td><strong>Presentación</strong></td><td>10%</td><td>¿El equipo comunica el valor claramente? ¿Negocio y técnico se complementan en el pitch?</td></tr>
+</table>
+
+<div class="callout">
+  <strong>Nota:</strong> Estos criterios permiten evaluar de forma justa equipos que trabajen en casos de uso completamente diferentes (ej: un equipo en supply chain y otro en customer analytics) bajo la misma rúbrica.
+</div>
+
+<!-- Section 7 -->
+<h2 id="s7">7. Herramientas y Stack</h2>
+
+<h3>Obligatorio</h3>
+<ul>
+  <li><strong>Cortex Code (Coco)</strong> — IDE/asistente principal para construir</li>
+  <li><strong>Snowflake Platform</strong> — Warehouse, stages, tables, compute</li>
+  <li>Al menos uno de: <strong>Snowflake Intelligence Agent</strong>, <strong>Semantic View</strong>, <strong>Cortex Search</strong>, <strong>Streamlit</strong></li>
+</ul>
+
+<h3>Skills ISF disponibles por industria</h3>
+<table>
+  <tr><th>Industria</th><th>Skills/Plays disponibles</th></tr>
+  <tr><td>CPG/Retail</td><td>Trade Promotions, Supply Chain Control Center, Campaign Activation, Competitive Pricing/RGM, Customer 360, Assortment Rationalization</td></tr>
+  <tr><td>Manufacturing</td><td>OEE/Quality, Predictive Maintenance, Supply Chain Visibility</td></tr>
+  <tr><td>Financial Services</td><td>Risk Analytics, Fraud Detection, Customer 360</td></tr>
+  <tr><td>Healthcare</td><td>Clinical Analytics, Patient 360, Compliance</td></tr>
+  <tr><td>Technology/SaaS</td><td>Product Analytics, Usage Metrics, Churn Prediction</td></tr>
+  <tr><td>General</td><td>Cortex Analyst, Cortex Search, Dynamic Tables, Data Sharing, Streamlit</td></tr>
+</table>
+
+<!-- Section 8 -->
+<h2 id="s8">8. Problem Statements por Industria</h2>
+
+<p>Cada equipo puede trabajar en un <strong>caso de uso diferente</strong>. Esto es intencional — los criterios de evaluación (sección 6) están diseñados para comparar soluciones diversas de forma justa. A continuación, ejemplos de problem statements por industria que el AE puede proponer al cliente:</p>
+
+<div class="industry-grid">
+  <div class="industry-card">
+    <h4>CPG / Retail</h4>
+    <ol>
+      <li>Trade Promotion Intelligence (ROI por canal/SKU)</li>
+      <li>Stock Availability & OOS alerts</li>
+      <li>HORECA Channel Assignment</li>
+      <li>Customer 360 para KAM</li>
+      <li>Field Sales Copilot (next best action)</li>
+    </ol>
+  </div>
+  <div class="industry-card">
+    <h4>Financial Services</h4>
+    <ol>
+      <li>Risk Dashboard con alertas tempranas</li>
+      <li>AML Transaction Monitor</li>
+      <li>Customer Lifetime Value prediction</li>
+    </ol>
+  </div>
+  <div class="industry-card">
+    <h4>Manufacturing</h4>
+    <ol>
+      <li>Predictive Maintenance (IoT + historial)</li>
+      <li>Quality Control Agent (causa raíz)</li>
+      <li>Supply Chain Visibility (lead times)</li>
+    </ol>
+  </div>
+  <div class="industry-card">
+    <h4>Technology / SaaS</h4>
+    <ol>
+      <li>Product Usage Intelligence</li>
+      <li>Customer Health Score automatizado</li>
+      <li>Competitive Intel Agent</li>
+    </ol>
+  </div>
+  <div class="industry-card">
+    <h4>Healthcare / Pharma</h4>
+    <ol>
+      <li>Patient 360 & cohort analysis</li>
+      <li>Clinical trial optimization</li>
+      <li>Claims analytics & fraud</li>
+    </ol>
+  </div>
+  <div class="industry-card">
+    <h4>General (cualquier industria)</h4>
+    <ol>
+      <li>Executive Briefing Agent</li>
+      <li>Document Intelligence (PDFs/contratos)</li>
+      <li>Data Marketplace Discovery</li>
+    </ol>
+  </div>
+</div>
+
+<!-- Section 9 -->
+<h2 id="s9">9. Premiación y Reconocimiento</h2>
+
+<table>
+  <tr><th>Premio</th><th>Para quién</th></tr>
+  <tr><td>Snowstore credits ($100-500)</td><td>Equipo ganador</td></tr>
+  <tr><td>Asset publicado en ISF</td><td>Top 2-3 soluciones</td></tr>
+  <tr><td>Spotlight en team call/newsletter</td><td>Todos los participantes</td></tr>
+  <tr><td>"Cocothon Champion" badge</td><td>SE que organiza exitosamente</td></tr>
+  <tr><td>Fast-track a POC formal</td><td>Soluciones con buy-in del cliente</td></tr>
+</table>
+
+<!-- Section 10 -->
+<h2 id="s10">10. Post-evento y Scaling</h2>
+
+<ol>
+  <li><strong>Documentación</strong> (misma semana) — SE Champion documenta solución como skill o demo replicable</li>
+  <li><strong>Handoff a FCTO</strong> — Si es generalizable, el FCTO la evalúa e incorpora al ISF</li>
+  <li><strong>Follow-up con cliente</strong> (1-2 semanas) — AE usa resultado como hook para próximos pasos (POC, expansión)</li>
+  <li><strong>Retroalimentación</strong> — Survey a participantes para iterar formato</li>
+  <li><strong>Playback regional</strong> — Compartir resultados en team calls para inspirar replicación</li>
+</ol>
+
+<!-- Section 11 -->
+<h2 id="s11">11. Gobernanza y Escalamiento</h2>
+
+<h3>Quién convoca una Cocothon</h3>
+<table>
+  <tr><th>Quién</th><th>Formato</th><th>Alcance</th></tr>
+  <tr><td>AE con su SE</td><td>Standard (3-4h)</td><td>Per-account, 1 cliente/prospecto</td></tr>
+  <tr><td>AE + Industry Principal</td><td>Full Day o Extended</td><td>Multi-account, varios prospectos de una vertical</td></tr>
+  <tr><td>Sales Leadership + FCTO</td><td>Extended</td><td>Eventos tipo "Industry Day" con múltiples clientes</td></tr>
+</table>
+
+<h3>Frecuencia sugerida</h3>
+<ul>
+  <li>1 Cocothon regional por quarter por vertical</li>
+  <li>Cocothons per-account ilimitadas (formato Standard)</li>
+</ul>
+
+<h3>Métricas de éxito</h3>
+<ul>
+  <li># de skills/assets incorporados al ISF</li>
+  <li>Pipeline influenciado post-evento ($)</li>
+  <li>Adoption lift en cuentas participantes (créditos consumidos)</li>
+  <li>NPS de participantes (clientes + internos)</li>
+  <li># de demos replicadas en otras regiones</li>
+</ul>
+
+<!-- Section 12 -->
+<h2 id="s12">12. Checklist de Preparación</h2>
+
+<ul class="checklist">
+  <li>Problem statements definidos y validados con el cliente</li>
+  <li>Datos del cliente cargados en Snowflake (o dataset sintético preparado)</li>
+  <li>Cuentas HOL creadas con features habilitados (ver solicitud HOL)</li>
+  <li>Cortex Code instalado y probado por todos los participantes técnicos</li>
+  <li>Skills relevantes preinstalados y funcionando</li>
+  <li>Jurado confirmado (2-3 personas, incluir sponsor del cliente)</li>
+  <li>Premios definidos</li>
+  <li>Sala o plataforma virtual confirmada (buena conexión si es presencial)</li>
+  <li>Invitación con agenda enviada a participantes (2 semanas antes)</li>
+  <li>Briefing previo con los equipos (problem statements + acceso a datos)</li>
+  <li>Datasets de prueba validados (verificar que las queries funcionan)</li>
+  <li>Perfiles de negocio y técnicos confirmados por equipo</li>
+</ul>
+
+<!-- Section 13 -->
+<h2 id="s13">13. Mejores Prácticas</h2>
+
+<div class="callout success">
+  <strong>Claves para una Cocothon exitosa:</strong>
+  <ol>
+    <li><strong>Mínimo 3 horas</strong> — El tiempo suficiente para que los equipos entiendan, construyan y presenten soluciones completas</li>
+    <li><strong>Equipos mixtos (negocio + técnico)</strong> — El perfil de negocio valida el valor, el técnico implementa. Ambos son necesarios</li>
+    <li><strong>Problem statements concretos</strong> — No dejarlo abierto; dar contexto de negocio claro y datos relevantes previamente preparados</li>
+    <li><strong>Pitch de 5 minutos</strong> — Fuerza a los equipos a focalizarse en el valor de negocio, no solo en la técnica</li>
+    <li><strong>Jurado mixto</strong> — Liderazgo del cliente + especialistas de Snowflake da credibilidad y perspectiva diversa</li>
+    <li><strong>Seguimiento inmediato</strong> — Documentar resultados y agendar follow-up en la misma semana del evento</li>
+  </ol>
+</div>
+
+<!-- Section 14 -->
+<h2 id="s14">14. ISF — Industry Solutions Framework</h2>
+
+<p>El ISF es el repositorio central de Snowflake para:</p>
+<ul>
+  <li><strong>Demos orientadas a outcomes</strong> de negocio por industria</li>
+  <li><strong>Skills de Cortex Code</strong> reutilizables</li>
+  <li><strong>Assets de GTM</strong> (decks, battle cards, qualification questions)</li>
+</ul>
+
+<h3>Flujo de incorporación al ISF</h3>
+<ol>
+  <li>SE construye demo alineada a necesidades del cliente y al framework ISF</li>
+  <li>SE contacta al FCTO para agregar al ISF</li>
+  <li>FCTO valida calidad (outcomes, funcionalidad, alineación GTM)</li>
+  <li>Se agrega al ISF para uso cross-regional</li>
+</ol>
+
+<div class="callout warning">
+  <strong>Para incorporar una solución al ISF:</strong>
+  Contacta al Field CTO de tu vertical o al Industry Principal de tu región. Ellos validan la calidad y alineación GTM antes de publicar en el repositorio central.
+</div>
+
+<!-- AGENDA TIMELINE CHART -->
+<h2>Agenda — 4 Horas de Impacto</h2>
+<div style="position:relative;height:300px;width:100%;margin:20px 0;">
+  <canvas id="agendaChart"></canvas>
+</div>
+<script>
+(function(){
+  const ctx = document.getElementById('agendaChart').getContext('2d');
+  new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: ['Apertura', 'Retos + Equipos', 'Tutorial CoCo', 'CoCo TIME', 'Prep Demos', 'Demo Day', 'Premiación'],
+      datasets: [{
+        label: 'Duración (minutos)',
+        data: [20, 15, 15, 120, 15, 35, 20],
+        backgroundColor: [
+          '#38a169', '#38a169', '#dd6b20', '#6b46c1', '#d53f8c', '#d69e2e', '#29B5E8'
+        ],
+        borderRadius: 6,
+        borderSkipped: false
+      }]
+    },
+    options: {
+      indexAxis: 'y',
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        title: { display: false }
+      },
+      scales: {
+        x: { title: { display: true, text: 'Minutos' }, grid: { display: false } },
+        y: { grid: { display: false } }
+      }
+    }
+  });
+})();
+</script>
+
+<!-- MERMAID: TEAM ORG CHART PLACEHOLDER -->
+<h2>Estructura de Equipos</h2>
+<p><em>Este diagrama se genera dinámicamente según los equipos configurados. Placeholder:</em></p>
+<div class="mermaid">
+graph TD
+    subgraph "Categoría 1"
+        E1["Equipo 1: Problem Statement A"]
+        E2["Equipo 2: Problem Statement B"]
+    end
+    subgraph "Categoría 2"
+        E3["Equipo 3: Problem Statement C"]
+    end
+    subgraph "Categoría 3"
+        E4["Equipo 4: Problem Statement D"]
+        E5["Equipo 5: Problem Statement E"]
+    end
+    
+    classDef cat1 fill:#29B5E8,stroke:#11567F,color:#fff
+    classDef cat2 fill:#6b46c1,stroke:#4a0080,color:#fff
+    classDef cat3 fill:#dd6b20,stroke:#b84c00,color:#fff
+    
+    class E1,E2 cat1
+    class E3 cat2
+    class E4,E5 cat3
+</div>
+
+<div class="footer">
+  <p><strong>Cocothon Framework v2.0</strong> — Industry Solutions Framework, Snowflake 2026</p>
+  <p>&copy; 2026 Snowflake Inc. All Rights Reserved. | Documento interno</p>
+</div>
+
+</div>
+</body>
+</html>

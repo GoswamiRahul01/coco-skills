@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Guía de Instalación — Profiles de Cortex Code para AEs</title>
+<style>
+  :root {
+    --sf-blue: #29B5E8;
+    --sf-dark: #11567F;
+    --sf-navy: #0a3a5c;
+    --sf-text: #2d3748;
+    --sf-light: #f7fafc;
+    --sf-border: #e2e8f0;
+    --sf-green: #38a169;
+    --sf-orange: #dd6b20;
+    --radius: 8px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+    color: var(--sf-text);
+    line-height: 1.6;
+    background: white;
+    font-size: 14px;
+  }
+  .header {
+    background: linear-gradient(135deg, var(--sf-dark) 0%, var(--sf-navy) 100%);
+    color: white;
+    padding: 40px 50px;
+    text-align: center;
+  }
+  .header h1 {
+    font-size: 28px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+  }
+  .header p {
+    font-size: 15px;
+    opacity: 0.9;
+  }
+  .container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 40px 30px;
+  }
+  h2 {
+    color: var(--sf-dark);
+    font-size: 20px;
+    font-weight: 700;
+    margin: 32px 0 16px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid var(--sf-blue);
+  }
+  h3 {
+    color: var(--sf-dark);
+    font-size: 16px;
+    font-weight: 700;
+    margin: 24px 0 12px;
+  }
+  p { margin-bottom: 12px; }
+  .callout {
+    background: #ebf8ff;
+    border-left: 4px solid var(--sf-blue);
+    padding: 16px 20px;
+    border-radius: 0 var(--radius) var(--radius) 0;
+    margin: 16px 0;
+  }
+  .callout.warning {
+    background: #fffbeb;
+    border-left-color: var(--sf-orange);
+  }
+  .callout.success {
+    background: #f0fff4;
+    border-left-color: var(--sf-green);
+  }
+  .callout strong { display: block; margin-bottom: 4px; }
+  code {
+    background: #edf2f7;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: 13px;
+  }
+  pre {
+    background: #1a202c;
+    color: #e2e8f0;
+    padding: 16px 20px;
+    border-radius: var(--radius);
+    overflow-x: auto;
+    margin: 12px 0;
+    font-size: 12px;
+    line-height: 1.5;
+  }
+  pre code { background: none; color: inherit; padding: 0; }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 16px 0;
+    font-size: 13px;
+  }
+  th {
+    background: var(--sf-dark);
+    color: white;
+    padding: 10px 12px;
+    text-align: left;
+    font-weight: 600;
+  }
+  td {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--sf-border);
+  }
+  tr:nth-child(even) td { background: var(--sf-light); }
+  .step-num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    background: var(--sf-blue);
+    color: white;
+    border-radius: 50%;
+    font-weight: 700;
+    font-size: 14px;
+    margin-right: 10px;
+  }
+  .profile-card {
+    border: 2px solid var(--sf-border);
+    border-radius: var(--radius);
+    padding: 20px;
+    margin: 16px 0;
+  }
+  .profile-card h4 {
+    color: var(--sf-dark);
+    font-size: 16px;
+    margin-bottom: 8px;
+  }
+  .profile-card .badge {
+    display: inline-block;
+    background: var(--sf-blue);
+    color: white;
+    padding: 2px 10px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+    margin-right: 6px;
+  }
+  ul { margin: 8px 0 16px 24px; }
+  li { margin-bottom: 6px; }
+  .footer {
+    text-align: center;
+    padding: 30px;
+    color: #718096;
+    font-size: 12px;
+    border-top: 1px solid var(--sf-border);
+    margin-top: 40px;
+  }
+  @media print {
+    @page { size: A4; margin: 15mm 12mm 20mm 12mm; }
+    body { background: white; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .header { -webkit-print-color-adjust: exact; print-color-adjust: exact; padding: 30px; }
+    .container { padding: 20px 10px; max-width: 100%; }
+    .callout { break-inside: avoid; page-break-inside: avoid; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .profile-card { break-inside: avoid; page-break-inside: avoid; }
+    pre { break-inside: avoid; page-break-inside: avoid; }
+    table { break-inside: auto; font-size: 11px; }
+    tr { break-inside: avoid; page-break-inside: avoid; }
+    th { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .step-num { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .badge { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    h2 { break-after: avoid; }
+    .footer { break-before: avoid; }
+    a { text-decoration: none; color: var(--sf-dark); }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>Profiles de Cortex Code para AEs</h1>
+  <p>Guía de instalación y uso — Demo Factory + Cocothon Organizer</p>
+</div>
+
+<div class="container">
+
+<h2>Qué son los Profiles</h2>
+
+<p>Un <strong>Profile</strong> de Cortex Code (CoCo Desktop) es un archivo <code>.md</code> que configura al asistente para un flujo de trabajo específico. Cuando CoCo lee el profile, se convierte en un especialista que ejecuta todo automáticamente — solo necesitas decirle qué quieres.</p>
+
+<div class="callout success">
+  <strong>Lo que tú haces vs lo que CoCo hace:</strong>
+  Tú dices: "Quiero organizar una cocothon para Grupo Éxito, retail"<br>
+  CoCo hace: Genera datos, configura cuentas, crea propuesta, materiales, y evalúa.
+</div>
+
+<h2>Profiles Disponibles</h2>
+
+<div class="profile-card">
+  <h4>1. Demo Factory <span class="badge">Crear demos SI</span></h4>
+  <p><strong>Archivo:</strong> <code>CORTEX_CODE.md</code></p>
+  <p><strong>Para qué:</strong> Clonar demos de Snowflake Intelligence para cualquier prospecto/industria en minutos. Genera datos ficticios, Cortex Search, Semantic Views, y Agentes listos para presentar.</p>
+  <p><strong>Comando:</strong> <em>"Clona OTIF_FINANZAS_TEMPLATE para [EMPRESA], sector [SECTOR]"</em></p>
+</div>
+
+<div class="profile-card">
+  <h4>2. Cocothon Organizer <span class="badge">Hackathons</span></h4>
+  <p><strong>Archivo:</strong> <code>cocothon-organizer.md</code></p>
+  <p><strong>Para qué:</strong> Organizar Cocothons (hackathons con Cortex Code) para clientes/prospectos. Te guía paso a paso: configuración, propuesta para el cliente, solicitud de cuentas HOL, datos, materiales, evaluación.</p>
+  <p><strong>Comando:</strong> <em>"Quiero organizar una cocothon para [EMPRESA]"</em></p>
+</div>
+
+<h2>Instalación (5 minutos)</h2>
+
+<h3><span class="step-num">1</span>Descargar Cortex Code Desktop</h3>
+<p>Si aún no lo tienes, descárgalo desde el portal interno de Snowflake o solicítalo a tu SE. Cortex Code Desktop es la aplicación de escritorio (CLI + interfaz) que ejecuta los profiles.</p>
+
+<h3><span class="step-num">2</span>Crear carpeta de trabajo</h3>
+<p>Crea una carpeta local donde CoCo almacenará los profiles y ejecutará su trabajo:</p>
+<pre><code>mkdir -p ~/Documents/snowflake-ae-tools
+cd ~/Documents/snowflake-ae-tools</code></pre>
+
+<h3><span class="step-num">3</span>Descargar los profiles</h3>
+<p>Descarga los archivos <code>.md</code> desde la carpeta compartida de Google Drive y colócalos en la carpeta que creaste:</p>
+
+<table>
+  <tr><th>Archivo</th><th>Ubicación en Drive</th><th>Profile</th></tr>
+  <tr><td><code>CORTEX_CODE.md</code></td><td>ae-demo-handoff/</td><td>Demo Factory</td></tr>
+  <tr><td><code>cocothon-organizer.md</code></td><td>cocothon-profile/</td><td>Cocothon Organizer</td></tr>
+</table>
+
+<p>Tu carpeta debe verse así:</p>
+<pre><code>~/Documents/snowflake-ae-tools/
+├── CORTEX_CODE.md              ← Demo Factory (se lee automáticamente)
+└── cocothon-organizer.md       ← Cocothon Organizer</code></pre>
+
+<h3><span class="step-num">4</span>Abrir CoCo Desktop en la carpeta</h3>
+<p>Abre Cortex Code Desktop y navega a la carpeta <code>~/Documents/snowflake-ae-tools</code>. CoCo lee automáticamente el archivo <code>CORTEX_CODE.md</code> como system prompt.</p>
+
+<div class="callout">
+  <strong>Nota importante:</strong>
+  CoCo Desktop lee <code>CORTEX_CODE.md</code> automáticamente al abrir cualquier carpeta que lo contenga. Para activar el profile de Cocothon, simplemente di: "Usa el profile cocothon-organizer" o "Lee cocothon-organizer.md".
+</div>
+
+<h3><span class="step-num">5</span>Configurar conexión a Snowflake</h3>
+<p>Asegúrate de que CoCo Desktop esté conectado a tu cuenta Snowflake con tu role y warehouse asignados. Si no estás seguro, di a CoCo: <em>"¿A qué cuenta estoy conectado?"</em></p>
+
+<h2>Uso: Demo Factory</h2>
+
+<h3>Crear una demo de Snowflake Intelligence</h3>
+<p>Simplemente di:</p>
+<pre><code>"Clona OTIF_FINANZAS_TEMPLATE para Alpina, sector lácteos, ciudad Bogotá"</code></pre>
+
+<p><strong>CoCo automáticamente:</strong></p>
+<ul>
+  <li>Clona la DB template (estructura completa, zero-copy)</li>
+  <li>Genera 200-500 filas de datos ficticios del sector indicado</li>
+  <li>Crea 10-15 documentos de políticas para Cortex Search</li>
+  <li>Configura Cortex Search Service con indexación automática</li>
+  <li>Crea el Agente en Snowflake Intelligence con charting y tools</li>
+  <li>Ejecuta checklist de validación</li>
+</ul>
+<p><strong>Resultado:</strong> En ~3-5 minutos tienes un agente funcional en SI.</p>
+
+<h3>Otros comandos útiles</h3>
+<table>
+  <tr><th>Qué quieres</th><th>Qué decir</th></tr>
+  <tr><td>Ver demos disponibles</td><td>"Muéstrame los agentes disponibles"</td></tr>
+  <tr><td>Modificar un agente</td><td>"Agrega tool de email al agente X"</td></tr>
+  <tr><td>Eliminar una demo</td><td>"Elimina la demo de Alpina"</td></tr>
+  <tr><td>Validar antes de presentar</td><td>"Ejecuta checklist pre-demo para Alpina"</td></tr>
+</table>
+
+<h2>Uso: Cocothon Organizer</h2>
+
+<h3>Organizar una Cocothon</h3>
+<p>Activa el profile y di:</p>
+<pre><code>"Lee cocothon-organizer.md"
+"Quiero organizar una cocothon para Grupo Éxito, retail"</code></pre>
+
+<p><strong>CoCo te guía paso a paso (interactivo):</strong></p>
+<ul>
+  <li>Te pregunta empresa, industria, fecha, modalidad, formato</li>
+  <li>Sugiere problem statements relevantes para tu industria</li>
+  <li>Pregunta sobre cuentas (existente o solicitar HOL)</li>
+  <li>Genera la propuesta HTML para el cliente (lenguaje de negocio)</li>
+  <li>Genera solicitud de cuentas HOL con todos los features necesarios</li>
+  <li>Genera materiales de briefing y cheat sheet</li>
+  <li>Evalúa equipos post-evento y documenta resultados</li>
+</ul>
+
+<h3>Comandos rápidos del Cocothon</h3>
+<table>
+  <tr><th>Qué quieres</th><th>Qué decir</th></tr>
+  <tr><td>Empezar de cero</td><td>"Organizar cocothon"</td></tr>
+  <tr><td>Solo la propuesta</td><td>"Genera propuesta cocothon para [EMPRESA]"</td></tr>
+  <tr><td>Solo cuentas HOL</td><td>"Genera solicitud de cuentas HOL para cocothon"</td></tr>
+  <tr><td>Generar datos</td><td>"Genera datos sintéticos para la cocothon"</td></tr>
+  <tr><td>Evaluar equipos</td><td>"Evaluar presentaciones de la cocothon"</td></tr>
+  <tr><td>Documentar resultados</td><td>"Genera documento de resultados"</td></tr>
+</table>
+
+<h2>Requisitos Técnicos</h2>
+
+<table>
+  <tr><th>Componente</th><th>Requerimiento</th></tr>
+  <tr><td>Cortex Code Desktop</td><td>Última versión instalada</td></tr>
+  <tr><td>Conexión Snowflake</td><td>Cuenta con role y warehouse asignados</td></tr>
+  <tr><td>Role mínimo</td><td>SYSADMIN o role custom con CREATE permisos</td></tr>
+  <tr><td>Región</td><td>AWS_US_WEST_2 (para Cortex AI completo)</td></tr>
+  <tr><td>Internet</td><td>Conexión estable (CoCo se comunica con Snowflake)</td></tr>
+</table>
+
+<div class="callout warning">
+  <strong>Importante — Snowflake Intelligence:</strong>
+  Para que los agentes aparezcan en SI, DEBE estar habilitado desde Snowsight: menú lateral → Snowflake Intelligence → Get Started. Crear la DB manualmente NO activa la feature. Si no ves la opción, pide a tu SE que lo habilite.
+</div>
+
+<h2>Troubleshooting</h2>
+
+<table>
+  <tr><th>Problema</th><th>Solución</th></tr>
+  <tr><td>CoCo no lee el profile</td><td>Verifica que estás en la carpeta correcta. Di: "Lee CORTEX_CODE.md"</td></tr>
+  <tr><td>"No tengo permisos"</td><td>Verifica tu role con "SHOW GRANTS TO ROLE [tu_role]". Pide grants a tu SE.</td></tr>
+  <tr><td>Agente no aparece en SI</td><td>Debe estar en SNOWFLAKE_INTELLIGENCE.AGENTS. Verificar con SE.</td></tr>
+  <tr><td>"agent spec is invalid"</td><td>Modelo no disponible en la región. CoCo usa "auto" por defecto.</td></tr>
+  <tr><td>Cortex AI no funciona</td><td>Verificar cross-region inference habilitado. Pedir a SE.</td></tr>
+  <tr><td>Cocothon: no sé qué PS usar</td><td>CoCo te sugiere opciones por industria. Solo elige.</td></tr>
+</table>
+
+<h2>Contacto</h2>
+
+<p>Si tienes problemas con la instalación o uso de los profiles:</p>
+<ul>
+  <li><strong>JuanPa</strong> — SE responsable de los profiles y soporte técnico</li>
+  <li><strong>Simon Contreras</strong> — Industry Principal, conceptos de Cocothon</li>
+</ul>
+
+<div class="footer">
+  &copy; 2026 Snowflake Inc. All Rights Reserved.<br>
+  Documento interno — No distribuir externamente
+</div>
+
+</div>
+</body>
+</html>

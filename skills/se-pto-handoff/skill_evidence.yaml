@@ -1,0 +1,35 @@
+skill_name: se-pto-handoff
+skill_type: internal
+promotion_stage: draft
+version: 1.0.0
+authors:
+- sfc-gh-jcastaneda
+submitter: JuanPa Castaneda
+validation:
+  testers:
+    count: 1
+    names:
+    - sfc-gh-jcastaneda
+customer_impact:
+  customers:
+    count: 0
+    names: []
+evidence_links: []
+notes: 'Generates PTO handoff documents for Solutions Engineers, including account
+
+  coverage plans, pending actions, and backup SE contact information.
+
+  Multi-language support (ES/EN).
+
+  '
+overlap_check:
+  max_score: 0.5434
+  highest_match: devops-guidance
+  highest_match_source: local
+  method: local-embedding
+  checked_against_count: 125
+  checked_at: '2026-06-22T19:15:39Z'
+  highest_match_description: 'Provide DevOps, CI/CD, and Database Change Management
+    (DCM) guidance for Snowflake. Use when: recommending deployment tools, explaining
+    imperative vs declarative approaches, advising on CI/CD pipeline'
+  tool_overlap: 0.3333

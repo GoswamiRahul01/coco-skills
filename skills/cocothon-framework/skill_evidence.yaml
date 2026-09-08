@@ -1,0 +1,13 @@
+# Cocothon Framework — Execution Evidence
+# Actualizar después de cada evento con los datos reales.
+# Schema: empresa, fecha, modalidad, ownership, equipos, soluciones, creditos_total, resultados
+
+executions:
+  - empresa: jamar
+    fecha: 2026-07-02
+    modalidad: standard
+    ownership: customer-led
+    equipos: 11
+    soluciones: 10
+    creditos_total: 141.25
+    resultados: ~/Documents/COCO/cocothon/jamar/resultados/resultados_jamar_2026-07-02.html
