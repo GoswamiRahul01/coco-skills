@@ -1,0 +1,38 @@
+skill_name: poc-readout
+skill_type: internal
+promotion_stage: draft
+version: 1.0.0
+authors:
+- sfc-gh-jcastaneda
+submitter: JuanPa Castaneda
+validation:
+  testers:
+    count: 1
+    names:
+    - sfc-gh-jcastaneda
+customer_impact:
+  customers:
+    count: 0
+    names: []
+evidence_links: []
+notes: 'Generates professional POC readout HTML documents with charts, peer comparisons,
+
+  engagement timelines, and Snowflake brand styling. Includes templates, component
+
+  library, and error fallback patterns.
+
+  '
+overlap_check:
+  max_score: 0.6629
+  highest_match: snowflake-presentation-builder
+  highest_match_source: local
+  method: local-embedding
+  checked_against_count: 125
+  checked_at: '2026-06-22T19:15:20Z'
+  highest_match_description: 'Build complete Snowflake presentations: research Snowflake
+    docs, create polished decks, HTML speaker notes, and SQL demo scripts. Use when:
+    building a snowflake presentation, creating a deck, creating'
+  highest_match_submitter: sfc-gh-aaburia
+  highest_match_testers:
+  - sfc-gh-aaburia
+  tool_overlap: 0.2857
