@@ -2,7 +2,17 @@
 id: dbt-model-generator
 name: dbt-model-generator
 skill-name: $dbt-model-generator
+title: dbt Model Generator
+summary: "Generate dbt staging, dimension, and fact models with tests from raw Snowflake tables, then open a PR for review."
 description: "Automatically generate dbt dimensional models from raw Snowflake tables. Profiles data, recommends star schema/OBT/wide table, generates staging/dim/fact models with tests, and submits a PR."
+tools:
+  - snowflake_sql_execute
+  - Bash
+  - Read
+  - Write
+  - Edit
+  - Glob
+  - ask_user_question
 prompt: "$dbt-model-generator generate dbt models from MY_DB.RAW_SCHEMA"
 language: en
 status: Published
@@ -66,6 +76,7 @@ Done
 - `<SOURCE_TABLE>`: Specific table to model (default: discover all tables in schema)
 - `<PROJECT_NAME>`: dbt project name (default: derived from database name)
 - `<PROJECT_PATH>`: Where to create the project on disk (default: `~/Documents/coco-dev/<PROJECT_NAME>`)
+- `<TARGET_SCHEMA>`: Schema where dbt builds the generated models (ask the user if not provided)
 - `<GITHUB_REPO>`: GitHub repo for PR (format: `owner/repo-name`)
 - `<WAREHOUSE>`: Snowflake warehouse (default: use active CoCo connection's warehouse)
 - `<ROLE>`: Snowflake role (default: use active CoCo connection's role)

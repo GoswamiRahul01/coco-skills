@@ -261,7 +261,7 @@ For every model, create a `schema.yml` with:
    ✅ dbt parse: X models, Y tests, Z sources — 0 errors
    ```
 
-6. **If Snowflake connection is available**, also run:
+6. **If Snowflake connection is available**, ask the user before running — `dbt run` creates or replaces tables and views in `<SOURCE_DATABASE>.<TARGET_SCHEMA>`. Only on explicit approval, run:
    ```bash
    <runner> dbt run --project-dir <PROJECT_PATH> --profiles-dir <PROJECT_PATH>
    <runner> dbt test --project-dir <PROJECT_PATH> --profiles-dir <PROJECT_PATH>
