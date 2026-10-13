@@ -1,5 +1,5 @@
 ---
-name: improve-literal-search-cortex-analyst
+name: analyst-literal-search
 title: Improve Analyst Literal Search
 summary: Enrich Cortex Analyst semantic models and views with enums, sample values, and Cortex Search Services for better literal matching.
 description: "Use when Cortex Analyst fails to match natural-language phrases to literal column values (e.g., 'iced tea' not finding 'Ice Tea'), or when you want to enrich a semantic model/view with is_enum flags, sample_values, and Cortex Search Service references on string dimensions. Triggers: literal search, cortex search service, cortex analyst search, sample values, dimension matching, fuzzy search, value lookup, search integration, improve analyst, literal values, enrich semantic view, optimize string columns, configure enum fields."
@@ -139,6 +139,23 @@ cortex analyst query "<question with a literal value>" --view=<view>
 ```
 
 Confirm matches resolve correctly.
+
+## Scripts
+
+For semantic views, the bundled scripts automate Steps 2 and 5. Dependencies are in `pyproject.toml` / `uv.lock`; run with `uv`. `<SKILL_DIR>` is this skill's directory. `--connection` defaults to `SNOWFLAKE_CONNECTION_NAME`, else the connector's default connection.
+
+- `scripts/analyze_table.py` (read-only): reads the semantic view YAML, finds string dimensions, queries cardinality and sample values on each base table, and writes recommendations (`enum` for ≤10 distinct values, `search_service` otherwise) to a JSON file.
+  ```bash
+  uv run --project <SKILL_DIR> python <SKILL_DIR>/scripts/analyze_table.py \
+    --semantic-view DB.SCHEMA.VIEW --warehouse <wh> --output analysis.json [--connection <name>]
+  ```
+- `scripts/apply_changes.py` (destructive): from `analysis.json`, runs `CREATE OR REPLACE CORTEX SEARCH SERVICE` for high-cardinality dimensions and recreates the semantic view via `SYSTEM$CREATE_SEMANTIC_VIEW_FROM_YAML` (which copies existing grants) with `is_enum`, `sample_values`, and search service references. It prints the planned statements and executes only after an interactive `y` or `--yes`.
+  ```bash
+  uv run --project <SKILL_DIR> python <SKILL_DIR>/scripts/apply_changes.py \
+    --analysis analysis.json [--update-lag '1 day'] [--connection <name>] [--yes]
+  ```
+
+⚠️ STOPPING POINT: Before running `apply_changes.py`, show the user the planned changes (from `analysis.json`, or a run without `--yes` that prints the statements and aborts) and get explicit approval. Only pass `--yes` after approval.
 
 ## Common Mistakes
 

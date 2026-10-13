@@ -1,5 +1,5 @@
 [project]
-name = "improve-literal-search-cortex-analyst"
+name = "analyst-literal-search"
 version = "0.1.0"
 description = "Enriches Cortex Analyst semantic models by analyzing string columns and adding enum flags, sample values, and Cortex Search Services"
 requires-python = ">=3.11"

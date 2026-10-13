@@ -7,7 +7,10 @@ Creates Cortex Search Services and updates semantic view with:
 - Search service references and sample values for high-cardinality columns
 
 Usage:
-    python apply_changes.py --analysis analysis.json --connection CONNECTION_NAME
+    python apply_changes.py --analysis analysis.json --connection CONNECTION_NAME [--yes]
+
+Planned statements are printed first. Nothing is executed unless the user
+confirms interactively or passes --yes.
 """
 
 import argparse
@@ -28,7 +31,7 @@ def get_connection(connection_name: str):
         sys.exit(1)
 
 
-def create_search_service(conn, column: Dict[str, Any], analysis: Dict[str, Any], target_lag: str = '1 day'):
+def build_search_service_ddl(column: Dict[str, Any], analysis: Dict[str, Any], target_lag: str = '1 day'):
     service_name = column['search_service_name']
     col_name = column['name']
     warehouse = analysis['warehouse_name']
@@ -45,12 +48,10 @@ def create_search_service(conn, column: Dict[str, Any], analysis: Dict[str, Any]
 
     if not base_table_info:
         print(f"   Warning: Could not find base table for {logical_table}", file=sys.stderr)
-        return
+        return None
 
     table_name = base_table_info['full_name']
     full_service_name = f"{sv_database}.{sv_schema}.{service_name}"
-
-    print(f"   Creating search service: {full_service_name}...")
 
     ddl = f"""
 CREATE OR REPLACE CORTEX SEARCH SERVICE {full_service_name}
@@ -61,13 +62,18 @@ CREATE OR REPLACE CORTEX SEARCH SERVICE {full_service_name}
       SELECT DISTINCT {col_name} FROM {table_name}
   )
 """
+    return full_service_name, ddl
+
+
+def create_search_service(conn, full_service_name: str, ddl: str):
+    print(f"   Creating search service: {full_service_name}...")
 
     cursor = conn.cursor()
     try:
         cursor.execute(ddl)
-        print(f"   Created: {service_name}")
+        print(f"   Created: {full_service_name}")
     except Exception as e:
-        print(f"   Failed to create {service_name}: {e}", file=sys.stderr)
+        print(f"   Failed to create {full_service_name}: {e}", file=sys.stderr)
         raise
     finally:
         cursor.close()
@@ -160,13 +166,14 @@ def enhance_yaml_with_enrichments(current_yaml: Dict[str, Any], analysis: Dict[s
     return current_yaml
 
 
-def update_semantic_view_with_yaml(conn, analysis: Dict[str, Any], enhanced_yaml: Dict[str, Any]):
-    """Recreate semantic view using SYSTEM$CREATE_SEMANTIC_VIEW_FROM_YAML"""
-    semantic_view_name = analysis['semantic_view_name']
+def build_semantic_view_call(analysis: Dict[str, Any], enhanced_yaml: Dict[str, Any]) -> str:
+    """Build the SYSTEM$CREATE_SEMANTIC_VIEW_FROM_YAML call.
+
+    When the view already exists, this procedure replaces it and copies its
+    grants (same effect as CREATE OR REPLACE SEMANTIC VIEW ... COPY GRANTS).
+    """
     sv_database = analysis['sv_database']
     sv_schema = analysis['sv_schema']
-
-    print(f"   Recreating semantic view {semantic_view_name}...")
 
     yaml_str = yaml.dump(enhanced_yaml, default_flow_style=False, sort_keys=False)
 
@@ -176,6 +183,12 @@ CALL SYSTEM$CREATE_SEMANTIC_VIEW_FROM_YAML(
   $${yaml_str}$$
 )
 """
+    return call_sql
+
+
+def update_semantic_view_with_yaml(conn, semantic_view_name: str, call_sql: str):
+    """Recreate semantic view using SYSTEM$CREATE_SEMANTIC_VIEW_FROM_YAML"""
+    print(f"   Recreating semantic view {semantic_view_name}...")
 
     cursor = conn.cursor()
     try:
@@ -185,14 +198,24 @@ CALL SYSTEM$CREATE_SEMANTIC_VIEW_FROM_YAML(
             print(f"   {result[0]}")
     except Exception as e:
         print(f"   Failed to update semantic view: {e}", file=sys.stderr)
-        print(f"   Generated YAML:\n{yaml_str}", file=sys.stderr)
+        print(f"   Generated SQL:\n{call_sql}", file=sys.stderr)
         raise
     finally:
         cursor.close()
 
 
-def apply_changes(conn, analysis: Dict[str, Any]):
-    print(f"Applying changes...")
+def confirm(prompt: str) -> bool:
+    if not sys.stdin.isatty():
+        return False
+    try:
+        answer = input(f"{prompt} [y/N]: ")
+    except EOFError:
+        return False
+    return answer.strip().lower() in ('y', 'yes')
+
+
+def apply_changes(conn, analysis: Dict[str, Any], assume_yes: bool = False) -> bool:
+    print(f"Planning changes...")
 
     search_service_columns = [c for c in analysis['columns'] if c['recommendation'] == 'search_service']
     enum_columns = [c for c in analysis['columns'] if c['recommendation'] == 'enum']
@@ -200,25 +223,43 @@ def apply_changes(conn, analysis: Dict[str, Any]):
     # Get update lag map from analysis (defaults to '1 day' if not present)
     update_lag_map = analysis.get('update_lag_map', {})
 
-    # Step 1: Create search services
-    if search_service_columns:
-        print(f"\nCreating {len(search_service_columns)} Cortex Search Service(s)...")
-        for col in search_service_columns:
-            service_name = col['search_service_name']
-            target_lag = update_lag_map.get(service_name, '1 day')
-            create_search_service(conn, col, analysis, target_lag)
+    # Step 1: Build search service DDL
+    service_ddls = []
+    for col in search_service_columns:
+        service_name = col['search_service_name']
+        target_lag = update_lag_map.get(service_name, '1 day')
+        planned = build_search_service_ddl(col, analysis, target_lag)
+        if planned:
+            service_ddls.append(planned)
 
-    # Step 2: Get current semantic view YAML
+    # Step 2: Get current semantic view YAML (read-only)
     print(f"\nReading current semantic view...")
     current_yaml = get_current_semantic_view_yaml(conn, analysis['semantic_view_name'])
 
     # Step 3: Enhance YAML with enrichments
     print(f"\nEnhancing semantic view YAML...")
     enhanced_yaml = enhance_yaml_with_enrichments(current_yaml, analysis)
+    call_sql = build_semantic_view_call(analysis, enhanced_yaml)
 
-    # Step 4: Recreate semantic view with enhanced YAML
+    # Show planned statements and require confirmation before any DDL
+    print(f"\nPlanned statements:")
+    for _, ddl in service_ddls:
+        print(f"{ddl.strip()};\n")
+    print(f"{call_sql.strip()};\n")
+
+    if not (assume_yes or confirm("Execute these statements?")):
+        print(f"Aborted. No changes were made. Re-run with --yes to execute non-interactively.")
+        return False
+
+    # Step 4: Create search services
+    if service_ddls:
+        print(f"\nCreating {len(service_ddls)} Cortex Search Service(s)...")
+        for full_service_name, ddl in service_ddls:
+            create_search_service(conn, full_service_name, ddl)
+
+    # Step 5: Recreate semantic view with enhanced YAML
     print(f"\nUpdating semantic view...")
-    update_semantic_view_with_yaml(conn, analysis, enhanced_yaml)
+    update_semantic_view_with_yaml(conn, analysis['semantic_view_name'], call_sql)
 
     print(f"\nAll changes applied successfully!")
 
@@ -236,6 +277,8 @@ def apply_changes(conn, analysis: Dict[str, Any]):
         for col in search_service_columns:
             print(f"   - {col['logical_table']}.{col['name']}: {col['search_service_name']}")
 
+    return True
+
 
 def main():
     parser = argparse.ArgumentParser(
@@ -248,8 +291,13 @@ def main():
     )
     parser.add_argument(
         '--connection',
-        default=os.environ.get('SNOWFLAKE_CONNECTION_NAME', 'demo'),
-        help='Snowflake connection name (default: SNOWFLAKE_CONNECTION_NAME env var or "demo")'
+        default=os.environ.get('SNOWFLAKE_CONNECTION_NAME'),
+        help='Snowflake connection name (default: SNOWFLAKE_CONNECTION_NAME env var, else the connector default connection)'
+    )
+    parser.add_argument(
+        '--yes',
+        action='store_true',
+        help='Execute the planned statements without the interactive confirmation prompt'
     )
     parser.add_argument(
         '--update-lag',
@@ -269,9 +317,12 @@ def main():
     conn = get_connection(args.connection)
 
     try:
-        apply_changes(conn, analysis)
+        applied = apply_changes(conn, analysis, assume_yes=args.yes)
     finally:
         conn.close()
+
+    if not applied:
+        sys.exit(1)
 
 
 if __name__ == '__main__':

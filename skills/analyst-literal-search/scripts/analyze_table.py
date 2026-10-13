@@ -230,8 +230,8 @@ def main():
     )
     parser.add_argument(
         '--connection',
-        default=os.environ.get('SNOWFLAKE_CONNECTION_NAME', 'demo'),
-        help='Snowflake connection name (default: SNOWFLAKE_CONNECTION_NAME env var or "demo")'
+        default=os.environ.get('SNOWFLAKE_CONNECTION_NAME'),
+        help='Snowflake connection name (default: SNOWFLAKE_CONNECTION_NAME env var, else the connector default connection)'
     )
     parser.add_argument(
         '--output',
