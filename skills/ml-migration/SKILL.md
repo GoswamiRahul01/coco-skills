@@ -2,7 +2,8 @@
 name: ml-migration
 title: ML Workload Migration
 summary: Migrate ML training and inference workloads from SageMaker, Azure ML, Vertex AI, or Databricks to Snowflake.
-description: Use when migrating ML models or training scripts from SageMaker, Azure ML, Vertex AI, or Databricks/MLflow into Snowflake Model Registry, SPCS, or ML Jobs. Triggers: migrate model, import model, deploy endpoint, convert training script, ML Jobs migration, sagemaker to snowflake, azureml to snowflake, vertex ai to snowflake, databricks to snowflake, mlflow migration.
+description: >-
+  Use when migrating ML models or training scripts from SageMaker, Azure ML, Vertex AI, or Databricks/MLflow into Snowflake Model Registry, SPCS, or ML Jobs. Triggers: migrate model, import model, deploy endpoint, convert training script, ML Jobs migration, sagemaker to snowflake, azureml to snowflake, vertex ai to snowflake, databricks to snowflake, mlflow migration.
 tools:
   - snowflake_sql_execute
   - Bash
