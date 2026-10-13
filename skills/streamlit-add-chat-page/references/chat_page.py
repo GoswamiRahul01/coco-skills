@@ -64,14 +64,52 @@ def _call_analyst(messages: list) -> dict:
     return r.json()
 
 
-def _run_sql(sql: str) -> pd.DataFrame:
-    """Execute Analyst SQL defensively: SELECT/WITH only, capped row count."""
-    clean = sql.strip().rstrip(";")
-    if not re.match(r"(?is)^\s*(with|select)\b", clean):
+_FORBIDDEN_SQL = re.compile(
+    r"\b(insert|update|delete|merge|truncate|create|alter|drop|undrop|rename|grant|"
+    r"revoke|call|execute|copy|put|get|remove|list|use|set|unset|begin|commit|"
+    r"rollback|show|describe|desc|explain)\b",
+    re.IGNORECASE,
+)
+
+
+def _strip_literals_and_comments(sql: str) -> str:
+    """Blank out string literals, quoted identifiers, $$-blocks and comments so the
+    keyword/statement checks below only see real SQL tokens."""
+    sql = re.sub(r"\$\$.*?\$\$", "''", sql, flags=re.S)
+    sql = re.sub(r"'(?:[^'\\]|\\.|'')*'", "''", sql, flags=re.S)
+    sql = re.sub(r'"(?:[^"]|"")*"', '""', sql)
+    sql = re.sub(r"--[^\n]*|//[^\n]*", " ", sql)
+    sql = re.sub(r"/\*.*?\*/", " ", sql, flags=re.S)
+    return sql
+
+
+def _validate_read_only(sql: str) -> str:
+    """Allow exactly one read-only SELECT/WITH statement; raise otherwise.
+
+    Analyst output is LLM-generated, so treat it as untrusted. This is defense in
+    depth — the real boundary is running the app under a role that only has SELECT
+    on the semantic view's tables (see SKILL.md).
+    """
+    clean = sql.strip().rstrip(";").strip()
+    tokens = _strip_literals_and_comments(clean)
+    if not re.match(r"(?is)^\s*(with|select)\b", tokens):
         raise ValueError("Refusing to run non-SELECT SQL.")
-    df = get_session().sql(clean).to_pandas()   # already fully qualified — run as-is
+    if ";" in tokens:
+        raise ValueError("Refusing to run multiple SQL statements.")
+    bad = _FORBIDDEN_SQL.search(tokens)
+    if bad:
+        raise ValueError(f"Refusing to run SQL containing '{bad.group(1).upper()}'.")
+    return clean
+
+
+def _run_sql(sql: str) -> pd.DataFrame:
+    """Execute Analyst SQL defensively: single read-only statement, row cap enforced
+    in the warehouse (not after pulling everything into the browser)."""
+    clean = _validate_read_only(sql)   # already fully qualified — do not re-qualify
+    capped = f"SELECT * FROM ({clean}) LIMIT {int(MAX_ROWS) + 1}"
+    df = get_session().sql(capped).to_pandas()
     if len(df) > MAX_ROWS:
-        df.attrs["truncated_from"] = len(df)
+        df.attrs["truncated_from"] = True
         df = df.head(MAX_ROWS)
     return df
 
@@ -114,7 +152,7 @@ def _render_results(df: pd.DataFrame) -> None:
     else:
         st.dataframe(disp, use_container_width=True, hide_index=True)
         if df.attrs.get("truncated_from"):
-            st.caption(f"Showing first {len(df):,} of {df.attrs['truncated_from']:,} rows.")
+            st.caption(f"Showing first {len(df):,} rows (result truncated).")
         _render_chart(df)
 
 
