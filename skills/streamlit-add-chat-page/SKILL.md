@@ -109,7 +109,12 @@ Adapt `references/chat_page.py`. It implements:
   (fast/cheap) with a deterministic fallback; feed the last ~10 turns for context.
 - **UX:** Generated SQL / Results / Answer expanders; example-question buttons via a
   `pending_q` + `st.rerun()` handoff; empty-result path lists valid values.
-- **Guardrails:** execute **SELECT/WITH only**; cap rendered rows (`MAX_ROWS`); render
+- **Guardrails:** treat Analyst SQL as untrusted LLM output. Run **one read-only
+  SELECT/WITH statement only** (reject `;`-chained statements and DML/DDL/`CALL`
+  keywords after stripping strings/comments), wrap it in a `LIMIT` so the row cap
+  (`MAX_ROWS`) is enforced in the warehouse, and run the app under a role that has
+  only `SELECT` on the semantic view's tables — the role, not the regex, is the real
+  security boundary. Render
   Analyst **warnings** and **clarification/suggestions** (no SQL) as guidance, not errors.
 - **Feedback loop:** 👍/👎 buttons + a `CHAT_FEEDBACK` table logging question, generated
   SQL, request_id, and status — mine it later for new verified queries and accuracy tracking.
