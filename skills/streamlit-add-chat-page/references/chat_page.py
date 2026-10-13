@@ -64,10 +64,12 @@ def _call_analyst(messages: list) -> dict:
     return r.json()
 
 
+# Not listed: DESC (ORDER BY ... DESC is common in Analyst SQL) and SHOW/DESCRIBE,
+# which the SELECT/WITH-only check already rejects as statements.
 _FORBIDDEN_SQL = re.compile(
     r"\b(insert|update|delete|merge|truncate|create|alter|drop|undrop|rename|grant|"
     r"revoke|call|execute|copy|put|get|remove|list|use|set|unset|begin|commit|"
-    r"rollback|show|describe|desc|explain)\b",
+    r"rollback|explain)\b",
     re.IGNORECASE,
 )
 
