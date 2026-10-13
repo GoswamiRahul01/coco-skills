@@ -2,7 +2,7 @@
 
 Quick reference for converting training scripts to Snowflake ML Jobs.
 
-> **For complete ML Jobs templates and submission patterns, see `../../ml-jobs/SKILL.md`.**
+> **For complete ML Jobs templates and submission patterns, see the `ml-jobs` sub-skill of the bundled `machine-learning` skill (load it with the skill tool).**
 > This file contains migration-specific mappings only.
 
 ---
@@ -75,5 +75,5 @@ Quick reference for converting training scripts to Snowflake ML Jobs.
 ## Next Steps
 
 For complete submission patterns, templates, and job management:
-- **See `../../ml-jobs/SKILL.md`** - Steps 5-7 for submission templates
-- **See `../../model-registry/SKILL.md`** - for `log_model()` parameters and verification
+- **See the `ml-jobs` sub-skill of the bundled `machine-learning` skill (load it with the skill tool)** - Steps 5-7 for submission templates
+- **See the `model-registry` sub-skill of the bundled `machine-learning` skill** - for `log_model()` parameters and verification

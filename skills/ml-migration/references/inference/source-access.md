@@ -14,7 +14,7 @@ aws configure list-profiles
 I found the following AWS profiles configured:
 - default
 - prod_account  
-- se_sandbox_contributor
+- ml-migration-source
 
 Which profile should I use for accessing s3://<bucket>/<path>?
 ```

@@ -45,10 +45,10 @@ required_reads:
   - file: "references/inference/source-access.md"
     phase: "I4"
     status: pending
-  - file: "../model-registry/SKILL.md"
+  - skill: "machine-learning/model-registry"  # load bundled machine-learning skill, follow its model-registry sub-skill
     phase: "I7"
     status: pending
-  - file: "../spcs-inference/SKILL.md"
+  - skill: "machine-learning/spcs-inference"  # load bundled machine-learning skill, follow its spcs-inference sub-skill
     phase: "I7"
     status: pending  # Only if SPCS deployment
     
@@ -62,7 +62,7 @@ required_reads:
   - file: "references/training/distributed.md"
     phase: "T2"
     status: pending  # Only if distributed/multi-GPU
-  - file: "../ml-jobs/SKILL.md"
+  - skill: "machine-learning/ml-jobs"  # load bundled machine-learning skill, follow its ml-jobs sub-skill
     phase: "T3"
     status: pending
   - file: "references/shared/config-templates.md"
@@ -204,12 +204,12 @@ required_reads:
     status: pending
     
   # I7 - Model Registry (ALWAYS for inference)
-  - file: "../model-registry/SKILL.md"
+  - skill: "machine-learning/model-registry"  # load bundled machine-learning skill, follow its model-registry sub-skill
     phase: "I7"
     status: pending
     
   # I7 - SPCS (only if target_platform: SNOWPARK_CONTAINER_SERVICES)
-  - file: "../spcs-inference/SKILL.md"
+  - skill: "machine-learning/spcs-inference"  # load bundled machine-learning skill, follow its spcs-inference sub-skill
     phase: "I7"
     status: pending
     required_if: "inference.target_platform == SNOWPARK_CONTAINER_SERVICES"
@@ -248,7 +248,7 @@ required_reads:
     required_if: "training.job_type in [distributed, hpo]"
     
   # T3 - ML Jobs (ALWAYS for training)
-  - file: "../ml-jobs/SKILL.md"
+  - skill: "machine-learning/ml-jobs"  # load bundled machine-learning skill, follow its ml-jobs sub-skill
     phase: "T3"
     status: pending
     

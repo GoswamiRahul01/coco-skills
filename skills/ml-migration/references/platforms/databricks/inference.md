@@ -88,7 +88,7 @@ else:
 
 ## Snowflake Registration
 
-**⛔ For `log_model()` API patterns, see:** `../../../../model-registry/SKILL.md`
+**⛔ For `log_model()` API patterns, see:** the `model-registry` sub-skill of the bundled `machine-learning` skill (load it with the skill tool)
 
 The patterns below are platform-specific extraction and conversion logic.
 

@@ -26,6 +26,9 @@ required_reads:
   - file: "path/to/file.md"
     phase: "I3"
     status: pending  # → read (after using Read tool)
+  - skill: "machine-learning/model-registry"  # bundled sub-skill, not a file in this repo
+    phase: "I7"
+    status: pending  # → read (after loading the bundled skill and following the sub-skill)
 ```
 
 ### Gate Check Before Each Phase
@@ -53,19 +56,19 @@ Status: BLOCKED - Must read file2.md first
 
 ### ⚠️ Sub-Skill Files ARE Required Reads
 
-**CRITICAL:** Sub-skill files (`SKILL.md` from other skills) are tracked the same way as reference files.
+**CRITICAL:** Sub-skills of the bundled `machine-learning` skill are tracked the same way as reference files. They are not files in this skill's directory: load the bundled `machine-learning` skill with the skill tool, then open the named sub-skill it routes to. Mark the entry `read` only after the sub-skill's instructions are loaded.
 
-| Phase | Required Sub-Skill | Why |
+| Phase | Required Sub-Skill (bundled `machine-learning`) | Why |
 |-------|-------------------|-----|
-| I7 | `../model-registry/SKILL.md` | Contains actual registration workflow |
-| I7 | `../spcs-inference/SKILL.md` | Contains actual SPCS deployment workflow |
-| T3 | `../ml-jobs/SKILL.md` | Contains actual job submission workflow |
+| I7 | `model-registry` | Contains actual registration workflow |
+| I7 | `spcs-inference` | Contains actual SPCS deployment workflow |
+| T3 | `ml-jobs` | Contains actual job submission workflow |
 
 **Common mistake:** Reading a reference file (like `xgboost-booster.md`) and skipping the sub-skill file. Reference files provide context, but sub-skill files provide the **workflow you must execute**.
 
 ```
-❌ WRONG: Read xgboost-booster.md → Skip model-registry/SKILL.md → Guess at registration
-✅ RIGHT: Read xgboost-booster.md → Read model-registry/SKILL.md → Follow its workflow
+❌ WRONG: Read xgboost-booster.md → Skip the model-registry sub-skill → Guess at registration
+✅ RIGHT: Read xgboost-booster.md → Load bundled machine-learning skill → Open its model-registry sub-skill → Follow its workflow
 ```
 
 ---

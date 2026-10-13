@@ -2,7 +2,7 @@
 
 Quick reference for migrating distributed and multi-GPU training to Snowflake ML Jobs.
 
-> **For complete distributed training patterns and code templates, see `../../ml-jobs/SKILL.md` Multi-Node Jobs section.**
+> **For complete distributed training patterns and code templates, see the Multi-Node Jobs section of the `ml-jobs` sub-skill in the bundled `machine-learning` skill (load it with the skill tool).**
 > This file contains platform migration mappings only.
 
 ---
@@ -93,5 +93,5 @@ Quick reference for migrating distributed and multi-GPU training to Snowflake ML
 ## Next Steps
 
 For complete code templates and submission patterns:
-- **See `../../ml-jobs/SKILL.md`** - Multi-Node Jobs section for `target_instances` usage
-- **See `../../ml-jobs/SKILL.md`** - Step 6 templates for job submission
+- **See the `ml-jobs` sub-skill of the bundled `machine-learning` skill (load it with the skill tool)** - Multi-Node Jobs section for `target_instances` usage
+- **See the `ml-jobs` sub-skill of the bundled `machine-learning` skill (load it with the skill tool)** - Step 6 templates for job submission
