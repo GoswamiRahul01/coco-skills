@@ -34,7 +34,7 @@ But the key point here is because they don't directly compare objects and don't 
 
 Declarative tools work by actively comparing the state of objects defined in source control (in various formats including SQL, HCL for Terraform, and more) with the state of an object deployed in a target database. The tool must be aware of every type of object in Snowflake, must be able to extract the current state of every object in Snowflake, must be aware of every attribute of every object in Snowflake, and must be able to compare every attribute of every object in Snowflake and generate SQL commands to migrate the object state.
 
-The reality today is that a number of customers do currently use declarative database comparison tools (primarily Terraform) directly in CI/CD pipelines. BUT, in general it is not advised to do this. There are number of important reasons why declarative tools should not be used in deployment pipelines, including the following:
+The reality today is that a number of teams do currently use declarative database comparison tools (primarily Terraform) directly in CI/CD pipelines. BUT, in general it is not advised to do this. There are number of important reasons why declarative tools should not be used in deployment pipelines, including the following:
 
 * Declarative tools can't handle all changes, including many important ones
    * Not all object changes can be made via SQL (for example see [ALTER TABLE … ALTER COLUMN](https://docs.snowflake.com/en/sql-reference/sql/alter-table-column))
@@ -100,7 +100,7 @@ The most obvious and best choice is to run the agent/code from a dedicated, ente
    * Deploy artifact to target environment
    * Run any tests/validations against target environment
 
-But lately many customers have expressed interest in trying to run the process entirely from Snowflake which might work for simple deployment scenarios but is not recommended for most scenarios. The basic process (which again isn't recommended) looks something like this:
+You may be interested in trying to run the process entirely from Snowflake which might work for simple deployment scenarios but is not recommended for most scenarios. The basic process (which again isn't recommended) looks something like this:
 
 * Connect Snowflake to Git repo
 * Connect "complex" objects (see description of complex objects above) directly to file(s) in a branch (or tag) in the Snowflake `GIT REPOSITORY` object
@@ -122,7 +122,7 @@ The following lists of tools provide a high level summary of the most popular to
 
 ### Imperative database deployment tools
 
-When it comes to imperative database deployment tools, DCM tools, there are a few options. The general recommendation here is that if a customer is already using one of these tools with an existing database (Flyway and Liquibase in particular) then they should continue using it with Snowflake. Here is a list of the most popular tools along with guidance on when to pick each.
+When it comes to imperative database deployment tools, DCM tools, there are a few options. The general recommendation here is that if your team is already using one of these tools with an existing database (Flyway and Liquibase in particular) then you should continue using it with Snowflake. Here is a list of the most popular tools along with guidance on when to pick each.
 
 Most popular tools:
 * [schemachange](https://github.com/Snowflake-Labs/schemachange)
@@ -134,17 +134,17 @@ Most popular tools:
    * Has support for many other relational databases
    * Has a free and paid version
    * The paid version provides support and additional features
-   * Recommended if the customer needs paid support or to use with additional databases
+   * A good fit if you need paid support or want to use it with additional databases
 * [Liquibase](https://www.liquibase.com/)
    * Has support for many other relational databases
    * Has a free and paid version
    * The paid version provides support and additional features
    * Has an older XML-based declarative model, but is very limited
-   * Recommended if the customer needs paid support or to use with additional databases
+   * A good fit if you need paid support or want to use it with additional databases
    * Flyway would be recommended first, before Liquibase
 * [Sqitch](https://sqitch.org/)
    * Has support for many other relational databases
-   * Would recommend using only if the customer already has experience with Sqitch
+   * Best used only if your team already has experience with Sqitch
    * Flyway would be recommended first, before Sqitch
 
 ### The Snowflake CLI tool
@@ -157,7 +157,7 @@ One very important tool, that deserves its own section here, is the [Snowflake C
 
 The most important thing to note here is that the Snowflake CLI tools is the primary tool for deploying "complex" objects to Snowflake, and is often used directly in CI/CD pipelines for this purpose. See the section [Simple vs Complex objects in Snowflake](#simple-vs-complex-objects-in-snowflake) for more details on "complex" objects.
 
-The Snowflake CLI also supports running SQL commands/scripts directly against Snowflake. And while some customers have built imperative style deployment pipelines using that capability in the Snowflake CLI, the Snowflake CLI is not a recommended imperative DCM tool. It lacks many of the more robust imperative DCM tool features.
+The Snowflake CLI also supports running SQL commands/scripts directly against Snowflake. And while some teams have built imperative style deployment pipelines using that capability in the Snowflake CLI, the Snowflake CLI is not a recommended imperative DCM tool. It lacks many of the more robust imperative DCM tool features.
 
 Note: Be careful not to confuse the [Snowflake CLI](https://docs.snowflake.com/en/developer-guide/snowflake-cli/index) tool with the older [SnowSQL](https://docs.snowflake.com/en/user-guide/snowsql) command line tool. The Snowflake CLI is named `snow` while the older SnowSQL CLI is named `snowsql`. See the note on the [SnowSQL](https://docs.snowflake.com/en/user-guide/snowsql) page for more details.
 
@@ -170,7 +170,7 @@ Most popular tools:
 
 #### More details on Terraform
 
-It is generally not recommended that customers use Terraform, especially if they haven't used it in the past. Terraform is a true Infrastructure as Code (IaC) tool, used primarily to manage infrastructure resources in the major cloud vendors like AWS, Azure, and Google Cloud Platform. Here is a short list of challenges with working with Terraform:
+Terraform is generally not the best choice for managing Snowflake objects, especially if your team hasn't used it in the past. Terraform is a true Infrastructure as Code (IaC) tool, used primarily to manage infrastructure resources in the major cloud vendors like AWS, Azure, and Google Cloud Platform. Here is a short list of challenges with working with Terraform:
 
 * It has a steep learning curve
 * Objects are primarily defined in a proprietary format called the [Terraform Configuration Language](https://developer.hashicorp.com/terraform/language)
@@ -178,14 +178,14 @@ It is generally not recommended that customers use Terraform, especially if they
 * The state file must be managed by a backend which supports locking to avoid corruption
 * Like all declarative tools the Snowflake Terraform Provider is incomplete and doesn't support all Snowflake objects and object attributes (see [Declarative database comparison tools](#declarative-database-comparison-tools) for more details)
 
-That said there are at least two scenarios in particular where Terraform can be an OK solution for customers:
+That said there are at least two scenarios in particular where Terraform can be an OK solution:
 
-* When the customer needs to manage Snowflake resources that connect directly to cloud infrastructure resources in one of the major cloud vendors. Examples of Snowflake objects that depend directly on cloud resouces are the [STORAGE INTEGRATION](https://docs.snowflake.com/en/sql-reference/sql/create-storage-integration), [API INTEGRATION](https://docs.snowflake.com/en/sql-reference/sql/create-api-integration), [CATALOG INTEGRATION](https://docs.snowflake.com/en/sql-reference/sql/create-catalog-integration), [PIPE](https://docs.snowflake.com/en/sql-reference/sql/create-pipe), etc. This use case is particularly relevant since Terraform can create both the Snowflake object as well as the cloud resources and manage dependencies between them, including the passing of values.
-* When the customer needs to manage Snowflake "environments". A Snowflake "environment" is defined here as the account level resources that define an isolated environment like dev, test, QA, or prod. Those account level objects include primarily `DATABASE`, `WAREHOUSE`, `ROLE`, and grants to those objects (though other account level objects could be included here). After creating the "environment" within Snowflake the management of the content of the databases can be delegated to the users who can leverage any of the recommended imperative style database deployment tools. Multiple "environments" can be created in the same Snowflake account, or they can be aligned one-to-one with a Snowflake account, it's up to the customer.
+* When you need to manage Snowflake resources that connect directly to cloud infrastructure resources in one of the major cloud vendors. Examples of Snowflake objects that depend directly on cloud resouces are the [STORAGE INTEGRATION](https://docs.snowflake.com/en/sql-reference/sql/create-storage-integration), [API INTEGRATION](https://docs.snowflake.com/en/sql-reference/sql/create-api-integration), [CATALOG INTEGRATION](https://docs.snowflake.com/en/sql-reference/sql/create-catalog-integration), [PIPE](https://docs.snowflake.com/en/sql-reference/sql/create-pipe), etc. This use case is particularly relevant since Terraform can create both the Snowflake object as well as the cloud resources and manage dependencies between them, including the passing of values.
+* When you need to manage Snowflake "environments". A Snowflake "environment" is defined here as the account level resources that define an isolated environment like dev, test, QA, or prod. Those account level objects include primarily `DATABASE`, `WAREHOUSE`, `ROLE`, and grants to those objects (though other account level objects could be included here). After creating the "environment" within Snowflake the management of the content of the databases can be delegated to the users who can leverage any of the recommended imperative style database deployment tools. Multiple "environments" can be created in the same Snowflake account, or they can be aligned one-to-one with a Snowflake account, it's up to you.
 
 ### CI/CD tools
 
-Any of these popular CI/CD tools will be a great choice for customers, and will work well with Snowflake. Most customers have a CI/CD tool they're already using or plan to use in this list.
+Any of these popular CI/CD tools will be a great choice, and will work well with Snowflake. Your team likely already uses, or plans to use, a CI/CD tool in this list.
 
 Most popular tools:
 * [GitHub Actions](https://github.com/features/actions)
@@ -196,14 +196,14 @@ Most popular tools:
 
 ### Other related tools
 
-For completeness, this section lists some other tools used by customers, but in general these tools are not recommended for use in deployment pipelines. A few notes are provided for each tool.
+For completeness, this section lists some other tools used with Snowflake, but in general these tools are not recommended for use in deployment pipelines. A few notes are provided for each tool.
 
 * [DataOps SOLE](https://docs.dataops.live/docs/sole/)
    * A declarative style database comparison tool
    * Part of the DataOps.live solution
    * SOLE stands for Snowflake Object Lifecycle Engine
    * SOLE is essentially a wrapper around the Snowflake Terraform Provider
-   * Would recommend using if the customer is already using DataOps.live
+   * A reasonable choice if your team is already using DataOps.live
 * [SnowDDL](https://docs.snowddl.com/)
    * A declarative style database comparison tool
 * [Titan Core](https://github.com/Titan-Systems/titan)
@@ -229,7 +229,7 @@ Real-world CI/CD deployment pipelines most often require multiple deployment too
 * Managing security and permissions if often done with a dedicated process, leveraging something like [Permifrost](https://gitlab.com/gitlab-data/permifrost) or a bespoke process.
 * Tools that manage Snowflake objects directly, like `dbt` does with tables and views.
 
-While it would be nice to have a single, imperative-style tool for deploying all Snowflake objects, the key point here is that customers should expect to leverage multiple tools in their CI/CD pipelines.
+While it would be nice to have a single, imperative-style tool for deploying all Snowflake objects, the key point here is that you should expect to leverage multiple tools in your CI/CD pipelines.
 
 ### Undo or Rollback
 
@@ -239,7 +239,7 @@ So the recommendation is not to use undo or rollback features offered by some to
 
 ## Snowflake native DCM features
 
-While Snowflake has been working on native DCM features for a while, they are not ready for production use for customers. To make matters worse, there are many resources online that incorrectly encourage customers to build their own DCM like processes with Snowflake native features (primarily with `EXECUTE IMMEDIATE FROM`). For example, the main [Snowflake DevOps](https://docs.snowflake.com/en/developer-guide/builders/devops) landing page encourages exactly this approach. See [External resources to ignore](#external-resources-to-ignore) for additional related recommendations online that should be ignored.
+Snowflake offers several native features that relate to DCM. For production pipelines, prefer an imperative DCM tool run from an external CI/CD system over a custom process built on `EXECUTE IMMEDIATE FROM`, because the external pipeline provides build steps, Git-triggered runs, approvals, testing, and staged promotion across environments (see [Where should the deployment process run?](#where-should-the-deployment-process-run) and [Approaches to avoid](#approaches-to-avoid)).
 
 The following are the native Snowflake features most commonly used for DCM:
 
@@ -254,36 +254,38 @@ The following are the native Snowflake features most commonly used for DCM:
    * Provides a way to execute a SQL script directly from a Snowflake warehouse, so the user doesn't need to set up and schedule a process on an external compute resource
    * Can be useful for many purposes but should not be used directly in deployment pipelines!
    * Is not a replacement for an imperative style DCM tool as it doesn't support change script types, logging, and much more
-* [DCM PROJECTS](https://docs.snowflake.com/en/LIMITEDACCESS/dcm-projects/snowflake-dcm-projects)
+* [DCM PROJECTS](https://docs.snowflake.com/en/user-guide/dcm-projects/dcm-projects-overview)
    * A native declarative DCM tool for Snowflake
-   * Still in Private Preview (PrPr) and only supports a small subset of Snowflake objects
-   * Not recommended as a deployment tool for Snowflake
+   * Generally Available since August 2026 (some related capabilities remain in preview; check the docs for current status and supported objects)
+   * A good fit when the objects you manage are supported and a declarative plan-then-deploy workflow suits your team; the bundled CoCo `dcm` skill helps you create and manage DCM projects
    * See the [More details on DCM Projects](#more-details-on-dcm-projects) section below for more details
 
 ### More details on DCM Projects
 
-Snowflake's native DCM feature is named "DCM Projects". It is a declarative DCM feature that builds on `CREATE OR ALTER` with the new SQL DDL and DML commands `DEFINE` and `EXECUTE DCM PROJECT` (with PLAN and DEPLOY). For more details see [DCM PROJECTS](https://docs.snowflake.com/en/LIMITEDACCESS/dcm-projects/snowflake-dcm-projects).
+Snowflake's native DCM feature is named "DCM Projects". It is a declarative DCM feature that builds on `CREATE OR ALTER` with the new SQL DDL and DML commands `DEFINE` and `EXECUTE DCM PROJECT` (with PLAN and DEPLOY). For more details see [DCM PROJECTS](https://docs.snowflake.com/en/user-guide/dcm-projects/dcm-projects-overview).
 
-While "DCM Projects" is positioned as a native DCM features, it is not recommended for most deployment scenarios. The most important reasons are:
+When deciding whether DCM Projects fits your deployment scenario, consider these tradeoffs:
 * Snowflake DCM Projects implements a declarative style approach, which is inherently limited (see [Declarative database comparison tools](#declarative-database-comparison-tools) for more details)
 * Snowflake DCM Projects are particularly limited, beyond the general declarative limitations
-   * Only a small subset of objects are supported today (see [DCM PROJECTS](https://docs.snowflake.com/en/LIMITEDACCESS/dcm-projects/snowflake-dcm-projects) for the current list of supported objects)
+   * Not every Snowflake object is supported (see [Supported entities in DCM Projects](https://docs.snowflake.com/en/user-guide/dcm-projects/dcm-projects-supported-entities) for the current list)
    * Only changes supported the standard Snowflake `ALTER` command are supported (see the [ALTER TABLE ... ALTER COLUMN](https://docs.snowflake.com/en/sql-reference/sql/alter-table-column) for an example with `TABLE`s)
    * Object and column renaming is not supported
-* Snowflake DCM Projects are still in an early preview stage, not Generally Available (GA)
+* Some DCM Projects capabilities are still in preview (check the docs for current status)
 
-But DCM Projects might be recommended in situations which meet the following requirements:
+DCM Projects is a good fit in situations which meet the following requirements:
 * Snowflake users who don't have a software or data engineering background
 * Snowflake users who don't have access to a industry standard CI/CD tool (see [CI/CD tools](#cicd-tools) for a list of popular ones)
-* Snowflake users who only need to manage objects supported by DCM Projects today (see [DCM PROJECTS](https://docs.snowflake.com/en/LIMITEDACCESS/dcm-projects/snowflake-dcm-projects) for the current list of supported objects)
+* Snowflake users who only need to manage objects supported by DCM Projects today (see [Supported entities in DCM Projects](https://docs.snowflake.com/en/user-guide/dcm-projects/dcm-projects-supported-entities) for the current list)
 * Snowflake users who don't make many changes directly to tables, leveraging tools like dbt instead for that
+
+If you use CoCo, the bundled `dcm` skill helps you build and manage DCM projects, and the bundled `ci-cd` skill helps you automate deployments from GitHub Actions, GitLab CI, or Azure DevOps.
 
 ## Related Snowflake features
 
 The following are a list of Snowflake features related to DCM. These are not direct DCM features, but they are often confused as such.
 
 * [Snowflake Git Repository](https://docs.snowflake.com/en/developer-guide/git/git-overview)
-   * Snowflake connecting to a customers Git repository does NOT mean DevOps
+   * Snowflake connecting to your Git repository does NOT mean DevOps
    * This feature is primarily to support stage 1 of the SDLC lifecycle (described in the [Defining the terms](#defining-the-terms) section)
    * This feature is often confused as being primarily use for deployment pipelines, which it is not
    * But this feature is very powerful, particularly when combined with Workspaces, the Snowflake web-based, modern IDE
@@ -347,14 +349,9 @@ These resources are helpful for working with Snowflake dbt Projects:
 
 ### Approaches to avoid
 
-The most important set of resources to ignore are those which try and leverage Snowflake Git Repositories with `EXECUTE IMMEDIATE FROM` to run SQL deployment scripts directly from Snowflake. This approach was suggested in the past (see links below) but is not recommended as it doesn't use a standard imperative style DCM tool and runs the deployment process directly from Snowflake (see [Where should the deployment process run?](#where-should-the-deployment-process-run) for more details on why that's not recommended). Here are the key resources which suggest that approach, but please ignore any other ones suggesting a similar approach:
+For production pipelines, prefer a standard imperative DCM tool run from an external CI/CD system over using Snowflake Git Repositories with `EXECUTE IMMEDIATE FROM` to run SQL deployment scripts directly from Snowflake. Running the deployment inside Snowflake can work for simple scenarios, but it lacks build steps, Git-triggered runs, approvals, testing, and staged promotion across environments (see [Where should the deployment process run?](#where-should-the-deployment-process-run) for details).
 
-* [Snowflake DevOps](https://docs.snowflake.com/en/developer-guide/builders/devops)
-* [Snowflake BUILD | The Future Of DevOps With Snowflake](https://www.youtube.com/watch?v=k20yLpW8-xU)
-* [DevOps in Snowflake: How Git and Database Change Management enable a file-based object lifecycle](https://medium.com/snowflake/devops-in-snowflake-how-git-and-database-change-management-enable-a-file-based-object-lifecycle-1f61a0d5257c)
-* [Accelerate Development and Productivity with DevOps in Snowflake](https://www.snowflake.com/en/blog/devops-snowflake-accelerating-development-productivity/)
-
-These resources are outdated and should now be ignored:
+These resources have been superseded by newer content:
 
 * [Getting Started With Data Engineering Using Snowflake Notebooks](https://www.youtube.com/watch?v=1zdciOSf8mA)
    * The general approach here with Snowflake CLI to deploy the complex `NOTEBOOK` objects is correct, but the `NOTEBOOK` object has been superseded by the new `NOTEBOOK PROJECT` object

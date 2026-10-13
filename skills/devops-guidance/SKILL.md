@@ -59,7 +59,7 @@ Load `references/raw-guidance.md` for the full reference (terminology, tool comp
 5. **Run the pipeline from an external CI/CD system** (GitHub Actions, GitLab CI, Jenkins, Azure DevOps).
 6. **Roll forward, not back.** Treat undo features as a last resort; write a forward fix.
 7. **Combining tools is normal** — DCM tool for SQL migrations + Snowflake CLI for complex objects.
-8. **DCM Projects** is not yet a strong fit for most pipelines (preview, limited object coverage, declarative).
+8. **DCM Projects** is Snowflake's native declarative option. Weigh it against the imperative approach based on object coverage and your team's needs; use the bundled `dcm` skill to build one and the `ci-cd` skill to automate it.
 9. **`EXECUTE IMMEDIATE FROM`** is not a deployment pipeline.
 10. **Git Repository in Snowflake** is a dev-loop convenience, not a CI/CD substitute.
 
@@ -79,7 +79,7 @@ For Terraform, be specific about tradeoffs: state file management, HCL format, i
 
 ### Step 4: Point to resources
 
-Pull links from `references/raw-guidance.md`. Flag the official Snowflake DevOps landing page as outdated — it promotes `EXECUTE IMMEDIATE FROM` as a pipeline pattern.
+Pull links from `references/raw-guidance.md`. For production pipelines, prefer an imperative DCM tool run from an external CI/CD system over `EXECUTE IMMEDIATE FROM` scripts run inside Snowflake, because the external pipeline adds build steps, Git triggers, approvals, testing, and staged environment promotion.
 
 ### Step 5: Summarize and ask for follow-ups
 
