@@ -1,4 +1,6 @@
-# Custom Incremental Dynamic Tables (Private Preview)
+# Custom Incremental Dynamic Tables (Public Preview)
+
+> **Preview feature:** Custom incremental DTs are in Public Preview. Syntax and behavior may change before general availability.
 
 Custom incremental DTs let you define refresh logic using **imperative DML** (MERGE or INSERT INTO) instead of a declarative SELECT. This unlocks patterns that standard DTs can't express efficiently.
 
@@ -15,7 +17,7 @@ CREATE OR REPLACE DYNAMIC TABLE my_dt (
 )
   TARGET_LAG = '5 minutes'
   WAREHOUSE = my_wh
-  REFRESH_MODE = CUSTOM_INCREMENTAL
+  [ REFRESH_MODE = { AUTO | CUSTOM_INCREMENTAL } ]  -- AUTO resolves to CUSTOM_INCREMENTAL when REFRESH USING is present
   [ BACKFILL FROM existing_table ]
   REFRESH USING (
     -- MERGE INTO SELF or INSERT INTO SELF
@@ -167,10 +169,11 @@ CREATE OR REPLACE DYNAMIC TABLE deletions_log (id INT, name STRING, email STRING
   );
 ```
 
-## Limitations (PrPr)
+## Limitations (Public Preview)
 
-- No cloning or replication
-- No DCM/dbt integration yet
+- Cloning and replication have caveats (for example, base tables in different failover groups aren't supported)
+- No dbt integration; use CREATE OR ALTER or DCM Projects to update definitions
 - No data governance policies on custom incremental DTs
-- No CREATE OR ALTER — must use CREATE OR REPLACE
+- Only CREATE OR ALTER can modify the `REFRESH USING` definition; changing `BACKFILL FROM` or `START AT` needs CREATE OR REPLACE (confirm with the user first)
+- `FROZEN WHERE` can't be combined with `REFRESH USING`
 - Correctness is the user's responsibility (not delayed-view semantics)

@@ -1,4 +1,4 @@
-# Common Pitfalls, Primary Keys, Immutability & Backfill
+# Common Pitfalls, Primary Keys, Frozen Regions & Backfill
 
 ## Common Pitfalls and How to Fix Them
 
@@ -10,10 +10,9 @@
 
 | Cause | Fix |
 |-------|-----|
-| `UNION DISTINCT` | Use `UNION ALL` + `QUALIFY ROW_NUMBER() = 1` for dedup |
-| `EXCEPT` / `INTERSECT` | Rewrite as `LEFT JOIN ... WHERE b.id IS NULL` (anti-join) |
+| `EXCEPT` / `INTERSECT` / `MINUS` | Rewrite as `LEFT JOIN ... WHERE b.id IS NULL` (anti-join) |
 | `CURRENT_TIMESTAMP()` in SELECT list | Move to WHERE clause, or use `METADATA$ROW_LAST_COMMIT_TIME` |
-| Self outer join (same table on both sides) | Break into intermediate DT |
+| Outer join with a non-equality predicate (`ON a.id > b.id`) | Rewrite as an equality join (for example, bin timestamps) |
 | Outer join with GROUP BY subqueries on both sides | Materialize aggregations as separate DTs |
 | Non-deterministic functions (`RANDOM()`, `UUID_STRING()`) | Move to application layer |
 
@@ -25,17 +24,19 @@ SHOW DYNAMIC TABLES LIKE '<dt_name>' IN SCHEMA <db>.<schema>;
 
 **Key insight:** When AUTO chooses FULL, try explicit `REFRESH_MODE = INCREMENTAL` first — it often works for window functions and other "Limited" operators.
 
-### Pitfall 2: SELECT * Breaks on Schema Changes
+### Pitfall 2: SELECT * and Schema Changes
 
-**Symptom:** DT refresh fails after a column is added/removed from the source table.
+**Symptom:** Unexpected reinitialization, or sensitive/unwanted columns appearing downstream, after the source table's schema changes.
 
-**Fix:** Always use explicit column lists.
+`SELECT *` DTs auto-adapt to most schema changes (adding or dropping a column, type widening) incrementally. Some changes still reinitialize the DT: dropping and re-adding a column, adding a column with a DEFAULT, or `SELECT *, expr AS alias` when a column is added. Incompatible in-place type changes fail the refresh.
+
+**Fix:** Use explicit column lists when you need to control the output schema or keep sensitive columns out. Use `SELECT * EXCLUDE (...)` when you want automatic evolution.
 
 ```sql
--- BAD
-CREATE DYNAMIC TABLE my_dt AS SELECT * FROM source_table;
+-- Auto-evolving: picks up new source columns
+CREATE DYNAMIC TABLE my_dt AS SELECT * EXCLUDE (ssn) FROM source_table;
 
--- GOOD
+-- Controlled schema: explicit column list
 CREATE DYNAMIC TABLE my_dt AS SELECT id, name, amount, created_at FROM source_table;
 ```
 
@@ -47,22 +48,20 @@ CREATE DYNAMIC TABLE my_dt AS SELECT id, name, amount, created_at FROM source_ta
 ```sql
 ALTER TABLE source_table SET CHANGE_TRACKING = TRUE;
 
--- Verify
-SELECT table_name, change_tracking
-FROM information_schema.tables
-WHERE table_schema = 'MY_SCHEMA' AND table_name = 'SOURCE_TABLE';
+-- Verify: check the change_tracking column
+SHOW TABLES LIKE 'SOURCE_TABLE' IN SCHEMA MY_SCHEMA;
 ```
 
 DTs auto-enable change tracking on their sources at creation time, but if it's explicitly disabled afterward, refreshes break.
 
 ### Pitfall 4: Target Lag Shorter Than Upstream
 
-**Symptom:** Downstream DT can never meet its target lag.
+**Symptom:** Snowflake rejects the downstream DT: it can't be fresher than its upstream.
 
 ```sql
 -- WRONG: child asks for 1 min but parent delivers every 10 min
 CREATE DYNAMIC TABLE parent TARGET_LAG = '10 minutes' AS ...;
-CREATE DYNAMIC TABLE child  TARGET_LAG = '1 minute' AS SELECT * FROM parent;
+CREATE DYNAMIC TABLE child  TARGET_LAG = '1 minute' AS SELECT id, amount FROM parent;
 ```
 
 **Fix:** Child target lag must be ≥ parent target lag. Use `DOWNSTREAM` for intermediates.
@@ -88,9 +87,9 @@ Intermediates use `TARGET_LAG = DOWNSTREAM` so they only refresh when the final 
 
 **Symptom:** Creation fails or unexpected FULL refreshes propagate.
 
-**Rule:** An incremental DT cannot have a FULL-refresh DT as an upstream dependency — unless the upstream has a **primary key** (declared or derived). With a PK, Snowflake can diff the FULL refresh output and pass only actual changes downstream. See the [Primary Keys](#primary-keys-rely--the-smallest-change-with-the-biggest-impact) section below.
+**Rule:** An incremental DT cannot have a FULL-refresh DT as an upstream dependency — unless the upstream has a **system-derived unique key** (for example, from `GROUP BY`) or a frozen region. With such a key, Snowflake can diff the FULL refresh output and pass only actual changes downstream. See the [Primary Keys](#primary-keys-rely--the-smallest-change-with-the-biggest-impact) section below.
 
-Without a PK, fix the upstream DT first, or accept FULL on the downstream.
+Without such a key, fix the upstream DT first, or accept FULL on the downstream.
 
 ### Pitfall 7: DISTINCT-Masked Join Fanout in Migrations
 
@@ -112,9 +111,11 @@ FROM facts a JOIN lookup b ON a.key = b.key
 GROUP BY a.key, a.data_col;
 ```
 
-### Pitfall 8: Immutability Misuse
+### Pitfall 8: Frozen Region Misuse
 
-`IMMUTABLE WHERE` logically partitions a DT into an **immutable region** (rows matching the predicate are frozen — never recomputed) and a **mutable region** (rows that don't match continue refreshing normally). This is powerful for audit trails, cost optimization, and data lifecycle management.
+> Frozen regions were previously called immutability constraints. `FROZEN WHERE` replaces `IMMUTABLE WHERE`; the legacy syntax is still accepted.
+
+`FROZEN WHERE` logically partitions a DT into an **immutable region** (rows matching the predicate are frozen — never recomputed) and a **mutable region** (rows that don't match continue refreshing normally). This is powerful for audit trails, cost optimization, and data lifecycle management.
 
 **Restrictions** (designed so the immutable boundary is deterministic and can only grow):
 - No subqueries
@@ -124,29 +125,29 @@ GROUP BY a.key, a.data_col;
 - No aggregate/window function columns in the predicate
 
 ```sql
--- GOOD: timestamp-based immutability (region only grows)
+-- GOOD: timestamp-based frozen region (region only grows)
 CREATE DYNAMIC TABLE my_dt
-  IMMUTABLE WHERE (event_time < CURRENT_TIMESTAMP() - INTERVAL '7 days')
+  FROZEN WHERE (event_time < CURRENT_TIMESTAMP() - INTERVAL '7 days')
   TARGET_LAG = '5 minutes'
   WAREHOUSE = my_wh
-  AS SELECT * FROM events;
+  AS SELECT event_id, event_type, user_id, event_time FROM events;
 
--- GOOD: status-based immutability (order tracking audit trail)
+-- GOOD: status-based frozen region (order tracking audit trail)
 CREATE DYNAMIC TABLE shipped_orders_log
   TARGET_LAG = '1 minute'
   WAREHOUSE = my_wh
-  IMMUTABLE WHERE (status = 'SHIPPED')
+  FROZEN WHERE (status = 'SHIPPED')
   AS SELECT order_id, status, amount, last_updated FROM orders;
 -- Once an order ships, the row is frozen — even if someone updates the source.
--- Query METADATA$IS_IMMUTABLE to verify which rows are locked.
+-- Query METADATA$IS_FROZEN to verify which rows are locked.
 
 -- BAD: subquery
 CREATE DYNAMIC TABLE my_dt
-  IMMUTABLE WHERE (id IN (SELECT id FROM archived)) -- ERROR
+  FROZEN WHERE (id IN (SELECT id FROM archived)) -- ERROR
   ...
 ```
 
-**Real-world use cases for IMMUTABLE WHERE:**
+**Real-world use cases for FROZEN WHERE:**
 - **Audit trail protection**: Lock shipped/completed orders so source corrections can't corrupt history
 - **Data deletion resilience**: Freeze historical data before purging base tables for compliance — downstream DTs retain the locked rows
 - **Schema evolution**: Lock old data when adding new columns — only future records get refreshed with the new schema
@@ -160,7 +161,7 @@ CREATE DYNAMIC TABLE my_dt
 
 ```sql
 CREATE OR REPLACE DYNAMIC TABLE regional_sales_summary
-  IMMUTABLE WHERE (sale_date < '2024-01-01')
+  FROZEN WHERE (sale_date < '2024-01-01')
   TARGET_LAG = '60 seconds'
   WAREHOUSE = my_wh
   BACKFILL FROM historical_sales
@@ -172,8 +173,8 @@ CREATE OR REPLACE DYNAMIC TABLE regional_sales_summary
 
 **Key rules:**
 - Clustering keys must be identical between the new DT and the backfill table
-- Only data matching the `IMMUTABLE WHERE` constraint can be backfilled
-- Without `BACKFILL FROM`, the first refresh runs the `REFRESH USING` query against the entire source
+- Only data matching the `FROZEN WHERE` predicate is backfilled; the active region is computed from the definition
+- Without `BACKFILL FROM`, the first refresh runs the DT's defining query against the entire source
 
 **Use cases:**
 - Migrating legacy pipelines to DTs without reprocessing years of history
@@ -205,7 +206,7 @@ ALTER TABLE dimension_products ADD PRIMARY KEY (product_id) RELY;
 **Derived keys — Snowflake reads your SQL:**
 - `GROUP BY` columns automatically become derived unique keys
 - `QUALIFY ROW_NUMBER() OVER (PARTITION BY ...) = 1` — partition columns become derived keys
-- Check with: `SHOW UNIQUE KEYS IN my_dynamic_table` — look for `SYS_CONSTRAINT_DERIVED_PK`
+- Check with: `SHOW UNIQUE KEYS IN my_dynamic_table` — no rows means no derived key
 
 **Incremental after FULL (the chain reaction fix):**
 
@@ -213,7 +214,7 @@ ALTER TABLE dimension_products ADD PRIMARY KEY (product_id) RELY;
 CREATE DYNAMIC TABLE sales_summary
   TARGET_LAG = '1 minute'
   WAREHOUSE = my_wh
-  REFRESH_MODE = AUTO  -- resolves to FULL (float aggregation + joins)
+  REFRESH_MODE = FULL  -- e.g. full refresh chosen for cost reasons
   AS
     SELECT region_name, channel_name, COUNT(*) AS sale_count, SUM(amount) AS total
     FROM fact_sales f
@@ -231,4 +232,4 @@ CREATE DYNAMIC TABLE regional_trends
     GROUP BY region_name;
 ```
 
-**Important:** Adding a PK to a base table does NOT retroactively update existing downstream DTs. You must `CREATE OR REPLACE` downstream DTs for the key to take effect. When switching from FULL to INCREMENTAL, you must explicitly set `REFRESH_MODE = INCREMENTAL` — `AUTO` will still resolve to FULL.
+**Important:** Adding a PK to a base table does NOT retroactively update existing downstream DTs. You must `CREATE OR REPLACE` downstream DTs for the key to take effect. Confirm with the user first: this reinitializes those DTs and their downstream incremental DTs. When switching from FULL to INCREMENTAL, you must explicitly set `REFRESH_MODE = INCREMENTAL` — `AUTO` will still resolve to FULL.

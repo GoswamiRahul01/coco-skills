@@ -62,9 +62,9 @@ templating:
 ## DCM Workflow
 
 ```bash
-snow dcm raw-analyze dcm/ -c <connection>
-snow dcm plan dcm/ -c <connection> --save-output
-snow dcm deploy dcm/ -c <connection> --alias "v1-initial"
+snow dcm plan --from dcm/ --target DEV -c <connection> --save-output
+# Review the plan with the user before deploying: deploy can create, alter, or drop objects
+snow dcm deploy --from dcm/ --target DEV -c <connection> --alias "v1-initial"
 ```
 
 **Tip:** Put all DT definitions in a single `dynamic_tables.sql` file within `dcm/definitions/`. DCM processes all `.sql` files in that directory. Use Jinja templating (`{{ database }}`, `{{ schema }}`) for environment portability.

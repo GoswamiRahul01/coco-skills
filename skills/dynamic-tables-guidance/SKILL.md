@@ -32,24 +32,24 @@ Use this skill when picking between DTs, materialized views, streams+tasks, or d
 Need to transform data in Snowflake?
   ├─ Single table, accelerate queries?           → Materialized View
   ├─ Multi-step SQL pipeline, fresh data?        → Dynamic Tables
-  ├─ Stream-static joins / append-only?          → Custom Incremental DTs (PrPr)
+  ├─ Stream-static joins / append-only?          → Custom Incremental DTs (Public Preview)
   ├─ Cross-warehouse portability or dbt tests?   → dbt models
   ├─ Procedural logic, IF/ELSE, API calls?       → Streams + Tasks
-  └─ Sub-15-second latency?                      → Streams + Tasks
+  └─ Sub-1-minute latency?                       → Streams + Tasks
 ```
 
 ## Comparison Matrix
 
 | Dimension | Dynamic Tables | Materialized Views | Streams + Tasks | dbt |
 |---|---|---|---|---|
-| Refresh | Target lag (15s+) | Auto, near-real-time | Manual schedule/trigger | Batch (`dbt run`) |
+| Refresh | Target lag (60s minimum) | Auto, near-real-time | Manual schedule/trigger | Batch (`dbt run`) |
 | SQL support | Full SELECT, JOINs, windows | Single table only | Full + procedural | Full + Jinja |
 | Chaining | `TARGET_LAG = DOWNSTREAM` | No | Manual DAG | Ref graph |
 | Incremental | Built-in for supported ops | Auto | You write it | Manual `is_incremental` |
 | Side effects | None | None | Email, API, externals | None |
 | Cost | Your warehouse | Serverless | Your warehouse | Your warehouse |
 
-**Rule of thumb:** Start with DTs. Reach for streams+tasks only when you need procedural logic, side effects, or sub-15s latency. Use dbt when you need its testing framework or cross-warehouse portability.
+**Rule of thumb:** Start with DTs. Reach for streams+tasks only when you need procedural logic, side effects, or sub-1-minute latency. Use dbt when you need its testing framework or cross-warehouse portability.
 
 ## Pipeline Pattern: Bronze → Silver → Gold
 
@@ -61,7 +61,8 @@ CREATE DYNAMIC TABLE bronze_events
   AS SELECT
     record_content:event_id::STRING AS event_id,
     record_content:event_type::STRING AS event_type,
-    record_content:timestamp::TIMESTAMP_NTZ AS event_ts
+    record_content:timestamp::TIMESTAMP_NTZ AS event_ts,
+    record_content:payload AS payload
   FROM raw_events_topic;
 
 -- Silver: business logic + joins
@@ -88,9 +89,9 @@ CREATE DYNAMIC TABLE gold_hourly_sales
 ## Monitoring Essentials
 
 ```sql
--- Health check
+-- Health check (refresh_mode / refresh_mode_reason come from SHOW DYNAMIC TABLES)
 SELECT name, scheduling_state, last_completed_refresh_state,
-       refresh_mode, time_within_target_lag_ratio
+       time_within_target_lag_ratio
 FROM TABLE(INFORMATION_SCHEMA.DYNAMIC_TABLES())
 ORDER BY time_within_target_lag_ratio ASC;
 
@@ -111,18 +112,18 @@ For account-wide DT cost, query `SNOWFLAKE.ACCOUNT_USAGE.QUERY_HISTORY` filtered
 
 ## Common Mistakes
 
-- **`SELECT *` in DT definition** — breaks incremental refresh on schema changes. Always use explicit column lists.
+- **Unplanned `SELECT *` in DT definition** — `SELECT *` auto-adapts to most base-table schema changes, but some changes (dropping and re-adding a column, adding a column with a DEFAULT) trigger reinitialization, and it propagates every column, including sensitive ones. Prefer explicit column lists when you need control over the output schema.
 - **Time-based lag on every layer** — only the leaf should have a time-based lag. Use `TARGET_LAG = DOWNSTREAM` on intermediates.
 - **Change tracking off on base tables** — DTs require `CHANGE_TRACKING = TRUE` for incremental refresh. Check with `SHOW TABLES`.
-- **Falling back to FULL refresh silently** — check `refresh_mode_reason` if `refresh_mode` shows `FULL` when you expected `INCREMENTAL`.
+- **Falling back to FULL refresh silently** — check `refresh_mode_reason` in `SHOW DYNAMIC TABLES` if `refresh_mode` shows `FULL` when you expected `INCREMENTAL`.
 - **Missing PRIMARY KEY RELY** — without it, `INSERT OVERWRITE` reprocesses everything downstream and you lose incremental chains.
-- **DISTINCT/UNION fanout** — these operators force full refresh. Refactor with `QUALIFY ROW_NUMBER()` or `UNION ALL` where possible.
+- **DISTINCT/UNION on large, poorly clustered data** — both are supported for incremental refresh, but they are locality-sensitive and can be slow. Prefer `QUALIFY ROW_NUMBER() ... = 1` or `UNION ALL` where possible. `EXCEPT`/`INTERSECT`/`MINUS` do force full refresh.
 - **Sharing one warehouse with interactive queries** — DT refreshes will compete with user queries. Use a dedicated warehouse.
 - **No `INITIALIZATION_WAREHOUSE` for big initial loads** — first refresh on large DTs can OOM a small warehouse. Set a larger init WH, then unset.
 
 ## Production Readiness Checklist
 
-- [ ] Explicit column lists (no `SELECT *`)
+- [ ] Explicit column lists, or a deliberate `SELECT *` / `SELECT * EXCLUDE` for schema evolution
 - [ ] `CHANGE_TRACKING = TRUE` on all base tables
 - [ ] Intermediates use `TARGET_LAG = DOWNSTREAM`
 - [ ] Leaf target lag ≥ all upstream lags
@@ -143,8 +144,8 @@ CREATE TASK notify_on_refresh
 AS
 BEGIN
   LET change_count INT := (SELECT COUNT(*) FROM gold_metrics_stream);
-  CALL SYSTEM$SEND_EMAIL('team@co.com', 'Metrics Updated',
-    change_count || ' rows changed');
+  CALL SYSTEM$SEND_EMAIL('my_email_integration', 'team@example.com', 'Metrics Updated',
+    :change_count || ' rows changed');
   CREATE OR REPLACE TEMP TABLE _consume AS SELECT * FROM gold_metrics_stream;
 END;
 ```
@@ -152,7 +153,7 @@ END;
 ## Workflow
 
 1. **Assess fit** — run the decision flowchart. If DTs aren't the right tool, stop here.
-2. **Pick refresh mode** — `AUTO` (default), `INCREMENTAL` (force, fail if ineligible), `FULL`, or `CUSTOM_INCREMENTAL` (PrPr).
+2. **Pick refresh mode** — `AUTO` (default), `INCREMENTAL` (force, fail if ineligible), `FULL`, or `CUSTOM_INCREMENTAL` (Public Preview).
 3. **Design layers** — Bronze→Silver→Gold with `DOWNSTREAM` on intermediates.
 4. **Harden** — apply the production checklist.
 
@@ -160,14 +161,17 @@ END;
 
 ⚠️ STOPPING POINT: Before applying `ALTER DYNAMIC TABLE ... SUSPEND` or `DROP DYNAMIC TABLE`, confirm with the user — downstream DTs depending on the target will stop refreshing.
 
+⚠️ STOPPING POINT: Before altering base tables (`ALTER TABLE ... SET CHANGE_TRACKING`, `ADD PRIMARY KEY ... RELY`) or running `snow dcm deploy`, show the statement or plan and confirm. `RELY` is not enforced; a non-unique key can produce wrong refresh results.
+
 ## Stopping Points
 
-- Workflow Step 4 — confirm DDL before `CREATE OR REPLACE DYNAMIC TABLE` on existing pipelines
+- Workflow Step 4 — confirm DDL before `CREATE OR REPLACE DYNAMIC TABLE` on existing pipelines (including examples from `references/`)
 - Workflow Step 4 — confirm before `ALTER ... SUSPEND` or `DROP DYNAMIC TABLE`
+- Workflow Step 4 — confirm before base-table `ALTER TABLE` changes or `snow dcm deploy`
 
 ## References
 
-- `references/pitfalls-and-pks.md` — full pitfall deep-dive plus `PRIMARY KEY RELY`, `IMMUTABLE WHERE`, `BACKFILL FROM`
-- `references/custom-incremental.md` — Custom Incremental DTs (PrPr) syntax and patterns
+- `references/pitfalls-and-pks.md` — full pitfall deep-dive plus `PRIMARY KEY RELY`, `FROZEN WHERE` (formerly `IMMUTABLE WHERE`), `BACKFILL FROM`
+- `references/custom-incremental.md` — Custom Incremental DTs (Public Preview) syntax and patterns
 - `references/dcm-for-dts.md` — Database Change Management for git-native DT deployment
 - Built-in Cortex Code skill: `dynamic-tables`
