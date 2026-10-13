@@ -4,7 +4,8 @@
 -- synthesize a grounded, cited answer. Replace <DB>.<SCHEMA>, table/column names.
 -- ============================================================================
 
-USE ROLE <OWNER_ROLE>;          -- role that will OWN the objects (= the SiS app owner)
+USE ROLE <ADMIN_ROLE>;          -- separate admin role that OWNS these objects (NOT the SiS app owner;
+                                -- grant the app's least-privilege role only what SKILL.md lists)
 USE WAREHOUSE <WAREHOUSE>;
 
 -- 1) CHUNKED DOCUMENTS TABLE --------------------------------------------------

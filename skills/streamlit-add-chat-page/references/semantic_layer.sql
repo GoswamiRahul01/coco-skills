@@ -5,7 +5,8 @@
 -- Replace <DB>.<SCHEMA>, table/column names, dims and metrics for your data.
 -- ============================================================================
 
-USE ROLE <OWNER_ROLE>;          -- role that will OWN the objects (= the SiS app owner)
+USE ROLE <ADMIN_ROLE>;          -- separate admin role that OWNS these objects (NOT the SiS app owner;
+                                -- grant the app's least-privilege role only what SKILL.md lists)
 USE WAREHOUSE <WAREHOUSE>;
 
 -- 1) FLATTEN TO ONE VIEW ------------------------------------------------------

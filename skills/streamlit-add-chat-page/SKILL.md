@@ -95,6 +95,8 @@ rows, no answer**. Fix it structurally:
   This also fixes wording/typo/abbreviation mismatches, not just case.
 - **Low-cardinality (1-10):** provide sample values instead (no service needed).
 - Do this for every user-facing filter column (categories, model/product names, …).
+- **⚠️ STOP** — show the DDL and get approval before running any `CREATE OR REPLACE`
+  (search services, semantic view): it overwrites an existing object of the same name.
 
 ### Step A3 — Build the chat page (`pages/chat.py`)
 Adapt `references/chat_page.py`. It implements:
@@ -112,16 +114,19 @@ Adapt `references/chat_page.py`. It implements:
 - **Guardrails:** treat Analyst SQL as untrusted LLM output. Run **one read-only
   SELECT/WITH statement only** (reject `;`-chained statements and DML/DDL/`CALL`
   keywords after stripping strings/comments), wrap it in a `LIMIT` so the row cap
-  (`MAX_ROWS`) is enforced in the warehouse, and run the app under a role that has
-  only `SELECT` on the semantic view's tables — the role, not the regex, is the real
-  security boundary. Render
+  (`MAX_ROWS`) is enforced in the warehouse. The role, not the regex, is the real
+  security boundary: create the objects with a separate admin/owner role, and own the
+  app with a least-privilege role that has only `SELECT` on the base view/tables,
+  `USAGE` on the semantic view and search service, `INSERT` on the feedback table, and
+  `USAGE` on the database/schema/warehouse. Render
   Analyst **warnings** and **clarification/suggestions** (no SQL) as guidance, not errors.
 - **Feedback loop:** 👍/👎 buttons + a `CHAT_FEEDBACK` table logging question, generated
   SQL, request_id, and status — mine it later for new verified queries and accuracy tracking.
 
 ### Step A4 — Deploy, verify, guard against regressions
-- Deploy the app (SiS runs **owner's rights**, so the app's owner role must have
-  access to the semantic view + Cortex).
+- **⚠️ STOP** — show the deploy command and target app name and get approval before deploying.
+- Deploy the app (SiS runs **owner's rights**, so the app's least-privilege owner role
+  needs the grants listed under Guardrails in Step A3, plus Cortex access).
 - Verify the model BEFORE trusting the UI:
   `cortex analyst query "<real question>" --view <fqn>` and confirm the generated
   SQL uses the **canonical literal** (e.g. `'Cortex Search'`, not `'cortex search'`).
@@ -139,6 +144,8 @@ Use `references/cortex_search_rag.sql` + `references/rag_chat_page.py`.
    ~10-15% overlap: smaller = more precise retrieval, larger = more context per chunk.
 2. **Create a Cortex Search service** `ON` the chunk-text column, with `ATTRIBUTES` for
    the metadata you'll cite (title, url, doc_id) and a `TARGET_LAG` to keep it fresh.
+   **⚠️ STOP** — show the DDL and get approval before running the `CREATE OR REPLACE`.
+   Create it with the admin/owner role, not the app's role (see Guardrails in Step A3).
 3. **⚠️ STOP** — verify retrieval quality with `SEARCH_PREVIEW` (are the top chunks
    actually relevant?) before wiring the app.
 
@@ -154,6 +161,7 @@ Adapt `references/rag_chat_page.py`. It implements:
   **no-relevant-results** message when retrieval is empty.
 
 ### Step B3 — Deploy & verify
+- **⚠️ STOP** — show the deploy command and target app name and get approval before deploying.
 - Deploy the app (owner's rights: the owner role needs `USAGE` on the search service + Cortex).
 - Ask a question whose answer you know and confirm the answer is correct **and** the cited
   chunks actually support it (grounding check).
@@ -216,8 +224,13 @@ Adapt `references/rag_chat_page.py`. It implements:
   DDL by re-querying the object, not by trusting a prior `SHOW`/`LAST_QUERY_ID`.
 
 ## Stopping points
-- ✋ Step 1: approve semantic-view DDL before deploy.
-- ✋ Step 4: confirm the NL round-trip works before calling it done.
+- ✋ A1: approve the base-view + semantic-view DDL before running it.
+- ✋ A2: approve any `CREATE OR REPLACE` (search services, semantic view) before running it.
+- ✋ A3: none — code changes only (page file is reviewed before deploy).
+- ✋ A4: approve the deploy, then confirm the NL round-trip works before calling it done.
+- ✋ B1: approve the search-service `CREATE OR REPLACE`, then verify retrieval with `SEARCH_PREVIEW`.
+- ✋ B2: none — code changes only.
+- ✋ B3: approve the deploy, then confirm a grounded, cited answer end-to-end.
 
 ## Output
 A deployed SiS chat page backed by: a flattened base view, a single-table semantic

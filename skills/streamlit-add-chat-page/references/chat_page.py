@@ -74,25 +74,46 @@ _FORBIDDEN_SQL = re.compile(
 )
 
 
-def _strip_literals_and_comments(sql: str) -> str:
-    """Blank out string literals, quoted identifiers, $$-blocks and comments so the
-    keyword/statement checks below only see real SQL tokens."""
-    sql = re.sub(r"\$\$.*?\$\$", "''", sql, flags=re.S)
-    sql = re.sub(r"'(?:[^'\\]|\\.|'')*'", "''", sql, flags=re.S)
-    sql = re.sub(r'"(?:[^"]|"")*"', '""', sql)
-    sql = re.sub(r"--[^\n]*|//[^\n]*", " ", sql)
-    sql = re.sub(r"/\*.*?\*/", " ", sql, flags=re.S)
-    return sql
+def _strip_literals_and_comments(sql: str, keep_literals: bool = False) -> str:
+    """Drop comments and (unless keep_literals) blank out string literals, quoted
+    identifiers and $$-blocks, so the keyword/statement checks below only see real
+    SQL tokens. One left-to-right scan, so a quote or $$ inside one construct can't
+    hide SQL inside another."""
+    out, i, n = [], 0, len(sql)
+    while i < n:
+        c, two = sql[i], sql[i:i + 2]
+        if two in ("--", "//"):                        # line comment
+            j = sql.find("\n", i)
+            out.append(" "); i = n if j < 0 else j
+        elif two == "/*":                              # block comment
+            j = sql.find("*/", i + 2)
+            out.append(" "); i = n if j < 0 else j + 2
+        elif two == "$$":                              # $$ ... $$ block
+            j = sql.find("$$", i + 2)
+            end = n if j < 0 else j + 2
+            out.append(sql[i:end] if keep_literals else "''"); i = end
+        elif c in "'\"":                               # 'string' or "identifier"
+            j = i + 1
+            while j < n and not (sql[j] == c and sql[j + 1:j + 2] != c):
+                j += 2 if (sql[j] == c or (c == "'" and sql[j] == "\\")) else 1
+            end = min(j + 1, n)
+            out.append(sql[i:end] if keep_literals else c + c); i = end
+        else:
+            out.append(c); i += 1
+    return "".join(out)
 
 
 def _validate_read_only(sql: str) -> str:
     """Allow exactly one read-only SELECT/WITH statement; raise otherwise.
 
     Analyst output is LLM-generated, so treat it as untrusted. This is defense in
-    depth — the real boundary is running the app under a role that only has SELECT
-    on the semantic view's tables (see SKILL.md).
+    depth — the real boundary is owning the app with a least-privilege role (SELECT
+    on the base view/tables, USAGE on the semantic view, INSERT on the feedback
+    table) while a separate admin role owns the objects (see SKILL.md).
     """
-    clean = sql.strip().rstrip(";").strip()
+    # Drop comments first (literals kept), then trailing semicolons, so a trailing
+    # `-- note` or `; -- done` can't break the LIMIT wrapper or trip the `;` check.
+    clean = _strip_literals_and_comments(sql, keep_literals=True).strip().rstrip(";").strip()
     tokens = _strip_literals_and_comments(clean)
     if not re.match(r"(?is)^\s*(with|select)\b", tokens):
         raise ValueError("Refusing to run non-SELECT SQL.")
@@ -108,7 +129,7 @@ def _run_sql(sql: str) -> pd.DataFrame:
     """Execute Analyst SQL defensively: single read-only statement, row cap enforced
     in the warehouse (not after pulling everything into the browser)."""
     clean = _validate_read_only(sql)   # already fully qualified — do not re-qualify
-    capped = f"SELECT * FROM ({clean}) LIMIT {int(MAX_ROWS) + 1}"
+    capped = f"SELECT * FROM (\n{clean}\n) LIMIT {int(MAX_ROWS) + 1}"
     df = get_session().sql(capped).to_pandas()
     if len(df) > MAX_ROWS:
         df.attrs["truncated_from"] = True
