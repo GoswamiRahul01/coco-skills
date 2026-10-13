@@ -12,9 +12,10 @@ description: |
   full agentic allow-list in a single call; retries plausible name variants before
   declaring a model unavailable; and reports a base/agentic matrix.
 
-  Triggers: check if we have access to a model, are there any new LLM models, any new
-  versions of GPT/Opus/Sonnet/GLM/grok/gemini, test a model to see that it works, is
-  this model available agentically, can I benchmark this model in base and agentic mode.
+  Triggers: check if we have access to a model, can I use model X in AI_COMPLETE or in
+  CoCo, are there any new LLM models, any new versions of GPT/Opus/Sonnet/grok/gemini,
+  test a model to see that it works, is this model available agentically, can I benchmark
+  this model in base and agentic mode.
 
   Do NOT use for: enabling model access via RBAC/allowlist grants (that is a governance
   task), Cortex Search or Analyst model selection, or fine-tuned/custom model registration.
@@ -35,9 +36,9 @@ Cortex exposes models through two independent surfaces, each with its own gate a
 own name spelling:
 
 - **Base mode** — AI SQL functions `AI_COMPLETE` / `SNOWFLAKE.CORTEX.COMPLETE`. Names are
-  UPPERCASE and sometimes carry a `1P-` provider prefix (e.g. `OPENAI-1P-GPT-5.6-SOL`).
+  UPPERCASE and sometimes carry a `1P-` provider prefix (e.g. `<PROVIDER>-1P-<MODEL-NAME>`).
 - **Agentic mode** — the curated allow-list enforced by the Cortex Code Agent. Names are
-  lowercase and often drop the `1p-` prefix (`openai-gpt-5.6-sol`). Availability is gated by
+  lowercase and often drop the `1p-` prefix (e.g. `openai-gpt-5.6-sol`). Availability is gated by
   the account allowlist (`CORTEX_MODELS_ALLOWLIST`), the region, and the cross-region setting
   (`CORTEX_ENABLED_CROSS_REGION`). The CoCo docs publish a supported-models list (see
   References), but it lags the live set — the docs themselves say the interactive `/model`
@@ -50,7 +51,8 @@ does not even guarantee base-callable — some listed models return `unknown mod
 ## When to Use
 
 - "Do we have access to `<model>`?" / "Is `<model>` available?"
-- "Are there any new LLM models or new versions of GPT / Opus / Sonnet / GLM / grok / gemini?"
+- "Can I use `<model>` in AI_COMPLETE or in CoCo?"
+- "Are there any new LLM models or new versions of GPT / Opus / Sonnet / grok / gemini?"
 - "Test `<model>` to see that it works."
 - "Can I benchmark `<model>` in base and agentic mode?"
 
@@ -72,11 +74,14 @@ does not even guarantee base-callable — some listed models return `unknown mod
    before its `legacy_date`** keeps access until `eol_date`, but an account that **never used
    it can no longer start** (calls fail), so a legacy model is often *not* addable to a new
    benchmark — the Step 2 probe is the source of truth; `EOL` = unavailable to every account
-   regardless of prior use; `INTERNAL`/`None` = probe to confirm. `in_region_availability: []`
+   regardless of prior use; `None` (NULL) = probe to confirm. `in_region_availability: []`
    with a populated `cross_region_availability` means the model runs only via cross-region
    inference — it fails unless the account has cross-region inference enabled (some models,
    e.g. `gemini-3.1-pro` and `openai-gpt-5-mini`, are cross-region only). See the docs
    reference below for authoritative lifecycle definitions and the per-region matrix.
+
+   ⚠️ **STOP** — Before Step 2, list the models you plan to probe, tell the user that each
+   `AI_COMPLETE` call consumes credits, and get their OK before running any.
 
 2. **Confirm base mode with a real call** — Set a warehouse only if none is active, then
    `SELECT AI_COMPLETE('<base-model-name>', 'Reply with the single word: ok') AS resp;`
@@ -85,7 +90,9 @@ does not even guarantee base-callable — some listed models return `unknown mod
 
 3. **Harvest the agentic allow-list in one shot** — Run ONE probe with a bogus model name;
    the CLI error dumps every allowed agentic model:
-   `cortex exec -m __definitely_not_a_model__ --no-history --max-turns 1 "Reply with exactly: ok" 2>&1 | tail -20`
+   `cortex exec -c <active-connection-name> -m __definitely_not_a_model__ --no-history --max-turns 1 "Reply with exactly: ok" 2>&1 | tail -20`
+   Use the same connection as the SQL probes in Steps 1–2 (the session's active connection), so
+   base and agentic results come from the same account.
    The error body contains `- Available models: <comma-separated lowercase list>`. That
    list **is** the allow-list (equivalent to the interactive `/model` command the CoCo docs
    call authoritative), and it also echoes the two gating controls — `Model allowlist:`
@@ -93,14 +100,18 @@ does not even guarantee base-callable — some listed models return `unknown mod
    Match your targets against it — this avoids probing each model separately and spending
    agent turns, and reflects models newer than the published docs list.
 
+   ⚠️ **STOP** — Before Step 4, list the models you plan to run as child agents, tell the user
+   that each run consumes credits, and get their OK before running any.
+
 4. **Confirm a specific target agentically** — For a target you want verified end-to-end:
-   `cortex exec -m <agentic-model-name> --no-history --max-turns 3 "Reply with exactly the word ok and nothing else. Do not call any tools." 2>&1 | tail -4`
+   `cortex exec -c <active-connection-name> -m <agentic-model-name> --allowed Read --no-history --max-turns 3 "Reply with exactly the word ok and nothing else. Do not call any tools." 2>&1 | tail -4`
+   `--allowed Read` blocks every tool except read-only file reads for the child run.
    A short reply → agentic-capable. `is not authorized or not available in your region` or
    `is not an allowed model` → not agentic. `Max tool call iterations reached` → the model
    works but hit the turn cap; treat as capable.
 
 5. **Apply name-variant fallback** — Before declaring a model unavailable, retry variants:
-   drop/add the `1p-` prefix (`openai-1p-gpt-5.6-sol` ↔ `openai-gpt-5.6-sol`); normalize
+   drop/add the `1p-` prefix (`<provider>-1p-<model-name>` ↔ `<provider>-<model-name>`); normalize
    case (base UPPERCASE vs agentic lowercase); try sibling suffixes (`-sol`, `-terra`,
    `-luna`); and try version-spelling variants (`opus-4-8` vs `opus-4.8`, family vs
    `-mini`/`-nano`).
@@ -130,15 +141,15 @@ does not even guarantee base-callable — some listed models return `unknown mod
 ## Examples
 
 **Scan for new models across families:**
-> "Are there any new LLM models or new versions for GPT, GLM, Opus, Sonnet?"
+> "Are there any new LLM models or new versions for GPT, Opus, Sonnet?"
 
-Expected output: a base/agentic matrix grouped by family, highlighting agentic-only models
-(e.g. `glm-5.2`), base-only models, and EOL/LEGACY models to avoid.
+Expected output: a base/agentic matrix grouped by family, highlighting agentic-only models,
+base-only models, and EOL/LEGACY models to avoid.
 
 **Confirm one model both ways:**
 > "Check if we have access to gpt-5.6 and that it works."
 
-Expected output: `SHOW` lifecycle for `OPENAI-1P-GPT-5.6-*`, a base `AI_COMPLETE` probe,
+Expected output: `SHOW` lifecycle for the matching GPT-5.6 names, a base `AI_COMPLETE` probe,
 an agentic `cortex exec` probe on `openai-gpt-5.6-sol`, and a verdict.
 
 **Pre-benchmark check:**
@@ -190,4 +201,5 @@ the other probe and say so, to avoid spending agent turns unnecessarily.
   Required for models not available in the account's region (empty `in_region_availability`);
   also required for CoCo to reach models outside the account's region. Set via
   `ALTER ACCOUNT SET CORTEX_ENABLED_CROSS_REGION = '<scope>'` (e.g. `AWS_GLOBAL`,
-  `AZURE_GLOBAL`, `ANY_REGION`).
+  `AZURE_GLOBAL`, `ANY_REGION`). Do NOT run this yourself: it is an account-level change that
+  requires ACCOUNTADMIN. Tell the user it is needed and let them or their admin decide.
