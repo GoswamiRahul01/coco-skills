@@ -19,7 +19,7 @@ Each skill is a folder containing a `SKILL.md` that teaches CoCo a workflow, cod
 Open CoCo and ask:
 
 ```
-Install the skills from https://github.com/Snowflake-Labs/cortex-code-skills
+Install the skills from https://github.com/Snowflake-Labs/coco-skills
 ```
 
 CoCo will clone, cache, and register every skill in this repo. To pull updates later:
@@ -31,7 +31,7 @@ Sync my skills
 To install a single skill rather than the whole repo:
 
 ```
-Install the skill at https://github.com/Snowflake-Labs/cortex-code-skills/tree/main/skills/<skill-name>
+Install the skill at https://github.com/Snowflake-Labs/coco-skills/tree/main/skills/<skill-name>
 ```
 
 Once installed, invoke a skill by typing `$<skill-name>` followed by your prompt. Run `/skill list` to see what's loaded, or `$$` to verify the active session's skill set.
